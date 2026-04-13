@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('complaints', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('reference_no')->unique();
+            $table->string('subject');
+            $table->text('description');
+            $table->string('category')->nullable();
+            $table->string('status')->default('pending')->index();
+            $table->string('priority')->default('normal');
+            $table->string('attachment_path')->nullable();
+            $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
         });
     }
