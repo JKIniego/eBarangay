@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Models\Announcement;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -8,7 +9,11 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $announcements = Announcement::where('is_published', true)
+        ->orderBy('published_at', 'desc')
+        ->paginate(8)
+        ->fragment('board');
+    return view('dashboard', compact('announcements'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
