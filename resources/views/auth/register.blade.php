@@ -1,4 +1,7 @@
 <x-guest-layout>
+    <div class="flex justify-center">
+        <p>Register for a new account</p>
+    </div>
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
