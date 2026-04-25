@@ -35,16 +35,24 @@
                             </div>
                         </div>
 
-                        <div class="mt-6">
+                        <div class="mt-3">
                             <p class="text-gray-800 leading-relaxed text-base">
                                 {{ $post->body }}
                             </p>
                         </div>
 
-                        <div class="mt-6 pt-4">
+                        <div class="mt-2">
                             <button class="text-sm font-semibold text-gray-500 hover:text-gray-700 transition">
                                 {{ __('Reply') }}
                             </button>
+                        </div>
+
+                        <div class="pt-2 flex items-center justify-between border-t border-gray-100">
+                            <div class="flex space-x-4">
+                                <span class="text-xs text-gray-400">
+                                    {{ $post->comments_count }} {{ \Illuminate\Support\Str::plural('comment', $post->comments_count) }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 @empty
@@ -52,6 +60,10 @@
                         {{ __("No posts found.") }}
                     </div>
                 @endforelse
+            </div>
+
+            <div class="mt-6">
+                {{ $posts->links() }}
             </div>
         </div>
     </div>

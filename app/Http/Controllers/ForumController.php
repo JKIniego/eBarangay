@@ -8,15 +8,14 @@ use Illuminate\View\View;
 
 class ForumController extends Controller
 {
-    public function index(): View
+    public function index()
     {
-        // Fetch posts from your schema, ordered by pinned status first
-        $posts = ForumPost::with('user')
+        $posts = ForumPost::with(['user', 'comments.user'])
+                    ->withCount('comments') // Adds a 'comments_count' attribute
                     ->orderBy('is_pinned', 'desc')
                     ->orderBy('created_at', 'desc')
-                    ->get();
+                    ->paginate(10); 
 
-        // This sends the $posts variable to your forum.blade.php
         return view('forum', compact('posts'));
     }
     
