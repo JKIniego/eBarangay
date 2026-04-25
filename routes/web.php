@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ForumController;
 use App\Models\Announcement;
@@ -10,7 +11,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    $announcements = Announcement::where('is_published', true)
+    $announcements = Announcement::published()
         ->orderBy('published_at', 'desc')
         ->paginate(8)
         ->fragment('board');
@@ -29,6 +30,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('announcements', AnnouncementController::class)->except(['show']);
 });
 
 Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
