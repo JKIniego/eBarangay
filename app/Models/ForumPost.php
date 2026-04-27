@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ForumPost extends Model
 {
-    protected $fillable = ['user_id', 'title', 'body', 'is_pinned', 'is_locked'];
+    protected $fillable = ['user_id', 'body', 'is_pinned', 'is_locked'];
 
     public function user()
     {

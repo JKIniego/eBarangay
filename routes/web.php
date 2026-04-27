@@ -36,7 +36,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('announcements', AnnouncementController::class)->except(['show']);
 });
 
-Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
-Route::get('/forum/create', [ForumController::class, 'create'])->name('forum.create');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
+    Route::get('/api/forum-posts', [ForumController::class, 'index']);
+    Route::post('/api/forum-posts', [ForumController::class, 'store']); 
+});
 
 require __DIR__.'/auth.php';

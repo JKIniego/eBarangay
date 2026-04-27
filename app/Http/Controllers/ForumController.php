@@ -8,19 +8,33 @@ use Illuminate\View\View;
 
 class ForumController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $posts = ForumPost::with(['user', 'comments.user'])
-                    ->withCount('comments') // Adds a 'comments_count' attribute
-                    ->orderBy('is_pinned', 'desc')
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10); 
+        $query = $request->query('search');
 
+        $posts = ForumPost::with(['user', 'comments.user'])
+                    ->withCount('comments')
+                    ->when($query, function ($q) use ($query) {
+                        return $q->where('body', 'LIKE', "%{$query}%");
+                    })
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(5);
+        
+        if ($request->expectsJson()) {
+            return response()->json($posts);
+        }
+        
         return view('forum', compact('posts'));
     }
     
-    public function create(): View
+    public function store(Request $request)
     {
-        return view('forum.create');
+        $validated = $request->validate([
+            'body' => 'required|string|min:3', 
+        ]);
+
+        $post = $request->user()->forumPosts()->create($validated);
+
+        return response()->json($post, 201);
     }
 }
