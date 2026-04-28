@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ForumComment extends Model
 {
-    protected $fillable = ['forum_post_id', 'user_id', 'body'];
+    protected $fillable = ['forum_post_id', 'user_id', 'body', 'is_soft_delete'];
 
     public function post()
     {

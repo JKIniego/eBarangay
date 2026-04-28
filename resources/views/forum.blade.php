@@ -14,6 +14,7 @@
                 <input type="text" id="ajax-search" placeholder="Search forum..." class="w-[75%] px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition shadow-sm">
 
                 <button 
+                    id="add-post-btn"
                     x-data="" 
                     x-on:click="$dispatch('open-modal', 'create-post-modal')"
                     class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition"
@@ -74,5 +75,29 @@
                 </x-primary-button>
             </div>
         </form>
+    </x-modal>
+
+    <x-modal name="reply-modal" focusable>
+        <div class="p-6">
+            <div id="modal-original-post" class="mb-6 pb-6 border-b border-gray-200">
+                </div>
+
+            <h3 class="text-sm font-bold text-gray-700 mb-3">Comments</h3>
+            <div id="comments-list" class="max-h-60 overflow-y-auto mb-4 space-y-3 bg-gray-50 p-4 rounded-xl">
+                </div>
+
+            <form id="reply-form" class="mt-4">
+                <textarea 
+                    id="reply-body" 
+                    rows="2" 
+                    class="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm text-sm"
+                    placeholder="Write a comment..."
+                    required
+                ></textarea>
+                <div class="mt-3 flex justify-end">
+                    <x-primary-button type="submit">Post Reply</x-primary-button>
+                </div>
+            </form>
+        </div>
     </x-modal>
 </x-app-layout>
