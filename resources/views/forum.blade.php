@@ -41,7 +41,6 @@
             initForum(currentUserId, isAdmin);
         });
     </script>
-
     <x-modal name="create-post-modal" focusable>
         <form id="create-post-form" class="p-6">
             @csrf

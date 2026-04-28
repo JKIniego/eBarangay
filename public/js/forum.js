@@ -30,7 +30,45 @@ function initForum(currentUserId, isAdmin) {
 
         posts.forEach(post => {
             const card = document.createElement('div');
-            card.className = "bg-white border border-gray-300 rounded-3xl p-6 shadow-sm mb-4";
+            card.className = "bg-white border border-gray-300 rounded-3xl p-6 shadow-sm mb  -4 cursor-pointer hover:bg-gray-50 transition-colors";
+            
+            const triggerReplyModal = async () => {
+                const originalPostContainer = document.getElementById('modal-original-post');
+                const commentsContainer = document.getElementById('comments-list');
+                const replyForm = document.getElementById('reply-form');
+                
+                const avatarInitials = post.user.name.substring(0, 2).toUpperCase();
+                const formattedDate = `Posted on ${new Date(post.created_at).toLocaleDateString()} ${new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+
+                originalPostContainer.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <div class="h-12 w-12 rounded-full border-2 border-black flex items-center justify-center bg-white text-black font-bold mr-4 shrink-0">
+                            ${avatarInitials}
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-900">${post.user.name}</h4>
+                            <p class="text-sm text-gray-500">${formattedDate}</p>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <p class="text-gray-900 text-lg leading-relaxed">${post.body}</p>
+                    </div>
+                `;
+                
+                replyForm.dataset.postId = post.id;
+                commentsContainer.innerHTML = '<p class="text-gray-400 text-sm italic py-4">Loading comments...</p>';
+
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'reply-modal' }));
+                
+                const response = await fetch(`/api/forum-posts/${post.id}/comments`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const comments = await response.json();
+                
+                renderComments(post.id, comments, currentUserId, isAdmin);
+            };
+
+            card.onclick = triggerReplyModal;
             
             const header = document.createElement('div');
             header.className = "flex items-start justify-between";
