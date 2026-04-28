@@ -20,8 +20,8 @@
                 </svg>
             </span>
             <x-text-input id="name" class="block w-full pl-10" type="text" name="name" :value="old('name')" placeholder="Name" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
+        <x-input-error :messages="$errors->get('name')" class="mt-2" />
 
         <!-- Email Address -->
         <div class="relative mt-4">
@@ -31,8 +31,8 @@
                 </svg>
             </span>
             <x-text-input id="email" class="block w-full pl-10" type="email" name="email" :value="old('email')" placeholder="Email" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
+        <x-input-error :messages="$errors->get('email')" class="mt-2" />
 
         <!-- Password -->
         <div class="relative mt-4">
@@ -42,8 +42,8 @@
                 </svg>
             </span>
             <x-text-input id="password" class="block w-full pl-10" type="password" name="password" placeholder="Password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
+        <x-input-error :messages="$errors->get('password')" class="mt-2" />
 
         <!-- Confirm Password -->
         <div class="relative mt-4">
@@ -53,8 +53,8 @@
                 </svg>
             </span>
             <x-text-input id="password_confirmation" class="block w-full pl-10" type="password" name="password_confirmation" placeholder="Confirm Password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
+        <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
 
         <!-- Remember Me -->
         <div class="block mt-4 flex justify-end mb-10 ms-4 me-4">
