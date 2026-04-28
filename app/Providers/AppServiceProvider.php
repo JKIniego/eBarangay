@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Allows us to check if the user is an admin throughout the app
         Gate::define('admin-only', function (User $user) {
-            return $user->role === 'admin'; 
+            return $user->role === 'admin';
         });
     }
 }
