@@ -94,7 +94,9 @@ function initForum(currentUserId, isAdmin) {
                         });
 
                         if (response.ok) {
-                            window.location.reload();
+                            const postsResponse = await fetch('/api/forum-posts', { headers: { 'Accept': 'application/json' } });
+                            const result = await postsResponse.json();
+                            renderPosts(result.data, currentUserId, isAdmin); 
                         }
                     };
                     actions.appendChild(deleteBtn);
@@ -290,25 +292,41 @@ function initForum(currentUserId, isAdmin) {
 
     document.getElementById('create-post-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const submitBtn = document.getElementById('submit-post');
         const editId = submitBtn.dataset.editId;
+        const bodyValue = document.getElementById('body').value;
+        const csrfToken = document.querySelector('input[name="_token"]').value;
         
-        if (editId) {
-            const response = await fetch(`/api/forum-posts/${editId}`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ body: document.getElementById('body').value })
-            });
+        const url = editId ? `/api/forum-posts/${editId}` : '/api/forum-posts';
+        const method = editId ? 'PATCH' : 'POST';
 
-            if (response.ok) {
-                window.location.reload(); 
-            }
+        const response = await fetch(url, {
+            method: method,
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ body: bodyValue })
+        });
+
+        if (response.ok) {
+            document.getElementById('body').value = '';
+            delete submitBtn.dataset.editId;
+            submitBtn.innerText = "Post";
+            
+            window.dispatchEvent(new CustomEvent('close-modal', { detail: 'create-post-modal' }));
+            
+            const postsResponse = await fetch('/api/forum-posts', { headers: { 'Accept': 'application/json' } });
+            const posts = await postsResponse.json();
+            
+            renderPosts(posts.data, currentUserId, isAdmin);
+            renderPagination(posts);
+        } else {
+            const errorData = await response.json();
+            alert(errorData.message || "Failed to save post.");
         }
     });
 

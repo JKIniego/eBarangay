@@ -10,15 +10,11 @@ Route::get('/user', function (Request $request) {
 
 
 // API for Forum
-Route::get('/forum-posts', [ForumController::class, 'index']);
-
-Route::middleware('auth:sanctum')->post('/forum-posts', [ForumController::class, 'store']);
-
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/forum-posts', [ForumController::class, 'index']);
+    Route::post('/forum-posts', [ForumController::class, 'store']);
+
     Route::patch('/forum-posts/{forumPost}', [ForumController::class, 'update']);
-});
-
-Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/forum-posts/{forumPost}', [ForumController::class, 'soft_delete']);
 });
 
