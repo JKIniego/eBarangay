@@ -30,7 +30,7 @@ function initForum(currentUserId, isAdmin) {
 
         posts.forEach(post => {
             const card = document.createElement('div');
-            card.className = "bg-white border border-gray-300 rounded-3xl p-6 shadow-sm mb  -4 cursor-pointer hover:bg-gray-50 transition-colors";
+            card.className = "group border border-gray-200 rounded-xl p-4 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 mb-3 cursor-pointer";
             
             const triggerReplyModal = async () => {
                 const originalPostContainer = document.getElementById('modal-original-post');
@@ -56,7 +56,7 @@ function initForum(currentUserId, isAdmin) {
                 `;
                 
                 replyForm.dataset.postId = post.id;
-                commentsContainer.innerHTML = '<p class="text-gray-400 text-sm italic py-4">Loading comments...</p>';
+                commentsContainer.innerHTML = '<p class="text-gray-400 text-sm italic py-4 flex justify-center">Loading comments...</p>';
 
                 window.dispatchEvent(new CustomEvent('open-modal', { detail: 'reply-modal' }));
                 
@@ -77,7 +77,7 @@ function initForum(currentUserId, isAdmin) {
             userInfo.className = "flex items-center";
 
             const avatar = document.createElement('div');
-            avatar.className = "h-12 w-12 rounded-full border-2 border-black flex items-center justify-center bg-white text-black font-bold mr-4";
+            avatar.className = "h-12 w-12 rounded-full border border-gray-200 flex items-center justify-center bg-gray-50 text-gray-700 font-bold mr-4 text-sm";
             avatar.textContent = post.user.name.substring(0, 2).toUpperCase();
 
             const nameContainer = document.createElement('div');
@@ -99,9 +99,10 @@ function initForum(currentUserId, isAdmin) {
             if (!isDeleted) {
                 if (post.user_id === currentUserId) {
                     const editBtn = document.createElement('button');
-                    editBtn.className = "px-3 py-1 border border-blue-500 text-blue-500 rounded-md hover:bg-blue-50 transition-all";
+                    editBtn.className = "text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline transition";
                     editBtn.textContent = "Edit";
-                    editBtn.onclick = () => {
+                    editBtn.onclick = (e) => {
+                        e.stopPropagation();
                         const textarea = document.getElementById('body');
                         const submitBtn = document.getElementById('submit-post');
                         
@@ -116,9 +117,10 @@ function initForum(currentUserId, isAdmin) {
 
                 if (isAdmin || post.user_id === currentUserId) {
                     const deleteBtn = document.createElement('button');
-                    deleteBtn.className = "px-3 py-1 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-all";
+                    deleteBtn.className = "text-xs font-medium text-red-500 hover:text-red-700 hover:underline transition";
                     deleteBtn.textContent = "Delete";
-                    deleteBtn.onclick = async () => {
+                    deleteBtn.onclick = async (e) => {
+                        e.stopPropagation();
                         if (!confirm('Are you sure you want to delete this post?')) return;
 
                         const response = await fetch(`/api/forum-posts/${post.id}`, {
@@ -142,7 +144,7 @@ function initForum(currentUserId, isAdmin) {
             }
 
             const replyBtn = document.createElement('button');
-            replyBtn.className = "px-3 py-1 border border-gray-400 text-gray-600 rounded-md hover:bg-gray-50 transition-all";
+            replyBtn.className = "text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline transition";
             replyBtn.textContent = "Reply";
             replyBtn.onclick = async () => {
                 const originalPostContainer = document.getElementById('modal-original-post');
@@ -202,7 +204,7 @@ function initForum(currentUserId, isAdmin) {
 
         comments.forEach(comment => {
             const div = document.createElement('div');
-            div.className = "flex flex-col bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-3 transition-all";
+            div.className = "flex flex-col bg-white p-3 rounded-lg border border-gray-100 mb-2 transition-all";
             
             const isDeleted = comment.body === "Deleted by user" || comment.is_soft_delete;
             const bodyClass = isDeleted ? "text-gray-400 italic" : "text-gray-800";
@@ -227,7 +229,7 @@ function initForum(currentUserId, isAdmin) {
             if (!isDeleted) {
                 if (comment.user_id === currentUserId) {
                     const editBtn = document.createElement('button');
-                    editBtn.className = "px-3 py-1 text-[10px] font-semibold border border-blue-500 text-blue-500 rounded-md hover:bg-blue-50 transition";
+                    editBtn.className = "text-[10px] font-medium text-blue-600 hover:text-blue-800 hover:underline transition";
                     editBtn.textContent = "Edit";
                     editBtn.onclick = () => {
                         contentArea.innerHTML = `
@@ -249,7 +251,7 @@ function initForum(currentUserId, isAdmin) {
                 
                 if (isAdmin || comment.user_id === currentUserId) {
                     const deleteBtn = document.createElement('button');
-                    deleteBtn.className = "px-3 py-1 text-[10px] font-semibold border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition";
+                    deleteBtn.className = "text-[10px] font-medium text-red-500 hover:text-red-700 hover:underline transition";
                     deleteBtn.textContent = "Delete";
                     deleteBtn.onclick = () => {
                         if (confirm("Are you sure you want to delete this reply?")) {
@@ -311,8 +313,8 @@ function initForum(currentUserId, isAdmin) {
         meta.links.forEach(link => {
             const btn = document.createElement('button');
             btn.innerHTML = link.label;
-            btn.className = `px-4 py-2 border rounded-full text-sm transition ${
-                link.active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 hover:bg-gray-100'
+            btn.className = `px-4 py-2 border rounded-lg text-sm transition ${
+                link.active ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
             } ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`;
 
             if (link.url) {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ForumController;
 use App\Models\Announcement;
@@ -12,11 +13,20 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $announcements = Announcement::published()
+        ->orderByDesc('is_featured')
         ->orderBy('published_at', 'desc')
-        ->paginate(8)
+        ->paginate(4)
         ->fragment('board');
-    return view('dashboard', compact('announcements'));
+
+    $complaints = \App\Models\Complaint::where('user_id', auth()->id())
+        ->latest()
+        ->paginate(3);
+
+    return view('dashboard', compact('announcements', 'complaints'));
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/bulletin', [AnnouncementController::class, 'bulletin'])->name('bulletin.index');
+Route::get('/bulletin/{announcement}', [AnnouncementController::class, 'bulletinShow'])->name('bulletin.show');
 
 Route::get('/forum', function () {
     return view('forum');
@@ -40,6 +50,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
     Route::get('/api/forum-posts', [ForumController::class, 'index']);
     Route::post('/api/forum-posts', [ForumController::class, 'store']); 
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/complaints', [ComplaintController::class, 'index']) ->name('complaints.index');
+    Route::post('/complaints', [ComplaintController::class, 'store']) ->name('complaints.store');
+    Route::get('/complaints/{complaint}', [ComplaintController::class, 'show']) ->name('complaints.show');
+    Route::patch('/complaints/{complaint}/resolve', [ComplaintController::class, 'resolve'])->name('complaints.resolve');
 });
 
 require __DIR__.'/auth.php';

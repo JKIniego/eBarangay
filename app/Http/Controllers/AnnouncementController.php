@@ -78,4 +78,18 @@ class AnnouncementController extends Controller
     {
         abort_unless($announcement->user_id === $request->user()->id, 403);
     }
+
+    public function bulletin()
+    {
+        $announcements = Announcement::orderByDesc('is_featured')
+            ->orderByDesc('published_at')
+            ->paginate(12);
+
+        return view('bulletin', compact('announcements'));
+    }
+
+    public function bulletinShow(Announcement $announcement)
+    {
+        return view('bulletin-show', compact('announcement'));
+    }
 }

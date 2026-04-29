@@ -5,29 +5,52 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold text-gray-900">{{ __("Forum") }}</h3>
-                
-                <input type="text" id="ajax-search" placeholder="Search forum..." class="w-[75%] px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition shadow-sm">
 
-                <button 
-                    id="add-post-btn"
-                    x-data="" 
-                    x-on:click="$dispatch('open-modal', 'create-post-modal')"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition"
-                >
-                    {{ __('Add to Forum') }}
-                </button>
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+
+                {{-- Board Header --}}
+                <div class="bg-gray-50 border-b border-gray-200 px-8 py-5 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">Community Forum</h1>
+                        <p class="text-sm text-gray-500 mt-0.5">Share your thoughts with Barangay 67</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input
+                            type="text"
+                            id="ajax-search"
+                            placeholder="Search forum..."
+                            class="w-64 px-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition"
+                        >
+                        <button
+                            id="add-post-btn"
+                            x-data=""
+                            x-on:click="
+                                document.getElementById('body').value = '';
+                                document.getElementById('submit-post').dataset.editId = '';
+                                document.getElementById('submit-post').innerText = 'Post to Forum';
+                                $dispatch('open-modal', 'create-post-modal')
+                            "
+                            class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-150"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            {{ __('Add Post') }}
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Posts --}}
+                <div class="p-8">
+                    <div id="posts-container" class="space-y-4">
+                        <p class="text-center text-gray-400 py-10">{{ __('Loading posts...') }}</p>
+                    </div>
+                    <div id="pagination-links" class="mt-6 pt-6 border-t border-gray-100"></div>
+                </div>
+
             </div>
-
-            <div id="posts-container" class="space-y-4">
-                <p class="text-center text-gray-500">{{ __('Loading posts...') }}</p>
-            </div>
-
-            <div id="pagination-links" class="mt-6"></div>
         </div>
     </div>
 
@@ -77,7 +100,7 @@
     </x-modal>
 
     <x-modal name="reply-modal" focusable>
-        <div class="p-6">
+        <div class="p-6 h-full flex flex-col">
             <div id="modal-original-post" class="mb-6 pb-6 border-b border-gray-200">
                 </div>
 
