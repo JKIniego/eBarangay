@@ -25,8 +25,6 @@ function initForum(currentUserId, isAdmin) {
             container.appendChild(noPosts);
             return;
         }
-        
-        const fragment = document.createDocumentFragment();
 
         posts.forEach(post => {
             const card = document.createElement('div');
@@ -176,10 +174,15 @@ function initForum(currentUserId, isAdmin) {
             
             const bodyContainer = document.createElement('div');
             bodyContainer.className = "mt-3";
+            
+            let bodyText = post.body;
+            if (post.is_soft_delete) {
+                bodyText = post.deleted_by_admin ? `Deleted by admin: ${post.deleted_by_admin}` : "Deleted by user";
+            }
 
             const bodyContent = document.createElement('p');
-            bodyContent.textContent = post.body;
-            if (post.body === "Deleted by user") {
+            bodyContent.textContent = bodyText;
+            if (post.is_soft_delete) {
                 bodyContent.className = "text-gray-400 italic font-medium";
             } else {
                 bodyContent.className = "text-gray-800 leading-relaxed";
@@ -187,10 +190,8 @@ function initForum(currentUserId, isAdmin) {
             bodyContainer.appendChild(bodyContent);
             
             card.append(header, bodyContainer);
-            fragment.appendChild(card);
+            container.appendChild(card);
         });
-
-        container.appendChild(fragment);
     }
 
     function renderComments(postId, comments, currentUserId, isAdmin) {
@@ -206,7 +207,12 @@ function initForum(currentUserId, isAdmin) {
             const div = document.createElement('div');
             div.className = "flex flex-col bg-white p-3 rounded-lg border border-gray-100 mb-2 transition-all";
             
-            const isDeleted = comment.body === "Deleted by user" || comment.is_soft_delete;
+            const isDeleted = comment.is_soft_delete;
+            let bodyContent = comment.body;
+            if (isDeleted) {
+                bodyContent = comment.deleted_by_admin ? `Deleted by admin: ${comment.deleted_by_admin}` : "Deleted by user";
+            }
+
             const bodyClass = isDeleted ? "text-gray-400 italic" : "text-gray-800";
             const postedDate = new Date(comment.created_at).toLocaleDateString() + " " + new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
@@ -219,7 +225,9 @@ function initForum(currentUserId, isAdmin) {
                     <div class="comment-actions flex space-x-2"></div>
                 </div>
                 <div class="comment-content-area mt-1">
-                    <p class="text-sm leading-relaxed ${bodyClass}">${comment.body}</p>
+                    <p class="text-sm leading-relaxed ${bodyClass}">
+                        ${bodyContent}
+                    </p>
                 </div>
             `;
 

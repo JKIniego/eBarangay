@@ -20,13 +20,6 @@ class ForumController extends Controller
                     })
                     ->orderBy('created_at', 'desc')
                     ->paginate(10);
-
-        $posts->getCollection()->transform(function ($post) {
-            if ($post->is_soft_delete) {
-                $post->body = "Deleted by user";
-            }
-            return $post;
-        });
         
         if ($request->expectsJson()) {
             return response()->json($posts);
@@ -63,11 +56,18 @@ class ForumController extends Controller
 
     public function soft_delete(Request $request, ForumPost $forumPost)
     {
-        if (!$request->user()->is_admin && $request->user()->id !== $forumPost->user_id) {
+        if ($request->user()->role !== 'admin' && $request->user()->id !== $forumPost->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        $updateData = ['is_soft_delete' => true];
         
-        $forumPost->update(['is_soft_delete' => true]);
+        if ($request->user()->role === 'admin' && $request->user()->id !== $forumPost->user_id) {
+            $updateData['deleted_by_admin'] = $request->user()->name;
+        }
+
+        $forumPost->update($updateData);
+
         return response()->json(['message' => 'Post soft deleted']);
     }
 
@@ -117,14 +117,17 @@ class ForumController extends Controller
             return response()->json(['message' => 'Comment not found in this post'], 404);
         }
 
-        if (!$request->user()->is_admin && $request->user()->id !== $forumComment->user_id) {
+        if ($request->user()->role !== 'admin' && $request->user()->id !== $forumComment->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $forumComment->update([
-            'is_soft_delete' => true,
-            'body' => 'Deleted by user'
-        ]);
+        $updateData = ['is_soft_delete' => true];
+
+        if ($request->user()->role === 'admin' && $request->user()->id !== $forumComment->user_id) {
+            $updateData['deleted_by_admin'] = $request->user()->name;
+        }
+
+        $forumComment->update($updateData);
 
         return response()->json(['message' => 'Reply deleted']);
     }
