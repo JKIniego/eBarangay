@@ -25,13 +25,24 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Test user for resident
+        // Test users for resident
+        // Resident 1
         User::updateOrCreate(
-            ['email' => 'resident@example.com'],
+            ['email' => 'resident1@example.com'],
             [
-                'name' => 'Resident',
+                'name' => 'Resident One',
                 'password' => bcrypt('password'),
-                'role' => 'resident',
+                'role' => 'resident'
+            ]
+        );
+
+        // Resident 2
+        User::updateOrCreate(
+            ['email' => 'resident2@example.com'],
+            [
+                'name' => 'Resident Two',
+                'password' => bcrypt('password'),
+                'role' => 'resident'
             ]
         );
     }
