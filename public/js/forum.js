@@ -35,26 +35,46 @@ function initForum(currentUserId, isAdmin) {
                 const commentsContainer = document.getElementById('comments-list');
                 const replyForm = document.getElementById('reply-form');
                 
+                originalPostContainer.textContent = '';
+                
                 const avatarInitials = post.user.name.substring(0, 2).toUpperCase();
                 const formattedDate = `Posted on ${new Date(post.created_at).toLocaleDateString()} ${new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
 
-                originalPostContainer.innerHTML = `
-                    <div class="flex items-center mb-4">
-                        <div class="h-12 w-12 rounded-full border-2 border-black flex items-center justify-center bg-white text-black font-bold mr-4 shrink-0">
-                            ${avatarInitials}
-                        </div>
-                        <div>
-                            <h4 class="text-xl font-bold text-gray-900">${post.user.name}</h4>
-                            <p class="text-sm text-gray-500">${formattedDate}</p>
-                        </div>
-                    </div>
-                    <div class="mt-2">
-                        <p class="text-gray-900 text-lg leading-relaxed">${post.body}</p>
-                    </div>
-                `;
+                const headerDiv = document.createElement('div');
+                headerDiv.className = "flex items-center mb-4";
+
+                const avatar = document.createElement('div');
+                avatar.className = "h-12 w-12 rounded-full border-2 border-black flex items-center justify-center bg-white text-black font-bold mr-4 shrink-0";
+                avatar.textContent = avatarInitials;
+
+                const infoDiv = document.createElement('div');
+                const nameH4 = document.createElement('h4');
+                nameH4.className = "text-xl font-bold text-gray-900";
+                nameH4.textContent = post.user.name;
+
+                const dateP = document.createElement('p');
+                dateP.className = "text-sm text-gray-500";
+                dateP.textContent = formattedDate;
+
+                infoDiv.append(nameH4, dateP);
+                headerDiv.append(avatar, infoDiv);
+
+                const bodyDiv = document.createElement('div');
+                bodyDiv.className = "mt-2";
+                const bodyP = document.createElement('p');
+                bodyP.className = "text-gray-900 text-lg leading-relaxed";
+                bodyP.textContent = post.body;
+                bodyDiv.appendChild(bodyP);
+
+                originalPostContainer.append(headerDiv, bodyDiv);
                 
                 replyForm.dataset.postId = post.id;
-                commentsContainer.innerHTML = '<p class="text-gray-400 text-sm italic py-4 flex justify-center">Loading comments...</p>';
+                commentsContainer.textContent = '';
+
+                const loading = document.createElement('p');
+                loading.className = "text-gray-400 text-sm italic py-4 flex justify-center";
+                loading.textContent = "Loading comments...";
+                commentsContainer.appendChild(loading);
 
                 window.dispatchEvent(new CustomEvent('open-modal', { detail: 'reply-modal' }));
                 
@@ -103,11 +123,9 @@ function initForum(currentUserId, isAdmin) {
                         e.stopPropagation();
                         const textarea = document.getElementById('body');
                         const submitBtn = document.getElementById('submit-post');
-                        
                         textarea.value = post.body;
                         submitBtn.dataset.editId = post.id;
                         submitBtn.innerText = "Update Post";
-                        
                         window.dispatchEvent(new CustomEvent('open-modal', { detail: 'create-post-modal' }));
                     };
                     actions.appendChild(editBtn);
@@ -117,24 +135,10 @@ function initForum(currentUserId, isAdmin) {
                     const deleteBtn = document.createElement('button');
                     deleteBtn.className = "text-xs font-medium text-red-500 hover:text-red-700 hover:underline transition";
                     deleteBtn.textContent = "Delete";
-                    deleteBtn.onclick = async (e) => {
+                    deleteBtn.onclick = (e) => {
                         e.stopPropagation();
-                        if (!confirm('Are you sure you want to delete this post?')) return;
-
-                        const response = await fetch(`/api/forum-posts/${post.id}`, {
-                            method: 'DELETE',
-                            credentials: 'include',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({ is_soft_delete: true })
-                        });
-
-                        if (response.ok) {
-                            const postsResponse = await fetch('/api/forum-posts', { headers: { 'Accept': 'application/json' } });
-                            const result = await postsResponse.json();
-                            renderPosts(result.data, currentUserId, isAdmin); 
+                        if (confirm('Are you sure you want to delete this post?')) {
+                            handleDeletePost(post.id);
                         }
                     };
                     actions.appendChild(deleteBtn);
@@ -144,29 +148,9 @@ function initForum(currentUserId, isAdmin) {
             const replyBtn = document.createElement('button');
             replyBtn.className = "text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline transition";
             replyBtn.textContent = "Reply";
-            replyBtn.onclick = async () => {
-                const originalPostContainer = document.getElementById('modal-original-post');
-                const commentsContainer = document.getElementById('comments-list');
-                const replyForm = document.getElementById('reply-form');
-                
-                originalPostContainer.innerHTML = `
-                    <div class="flex items-center mb-2">
-                        <div class="font-bold text-gray-900">${post.user.name}</div>
-                    </div>
-                    <p class="text-gray-800">${post.body}</p>
-                `;
-                
-                replyForm.dataset.postId = post.id;
-                commentsContainer.innerHTML = '<p class="text-gray-400 text-sm italic py-4">Loading comments...</p>';
-
-                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'reply-modal' }));
-                
-                const response = await fetch(`/api/forum-posts/${post.id}/comments`, {
-                    headers: { 'Accept': 'application/json' }
-                });
-                const comments = await response.json();
-                
-                renderComments(post.id, comments, currentUserId, isAdmin);
+            replyBtn.onclick = (e) => {
+                e.stopPropagation();
+                triggerReplyModal();
             };
             actions.appendChild(replyBtn);
 
@@ -188,10 +172,56 @@ function initForum(currentUserId, isAdmin) {
                 bodyContent.className = "text-gray-800 leading-relaxed";
             }
             bodyContainer.appendChild(bodyContent);
+
+            const numberReplies = document.createElement('p');
+            const replyCount = (post.comments && Array.isArray(post.comments)) ? post.comments.length : 0;
+            if (replyCount > 0) {
+                const replyBadge = document.createElement('span');
+                replyBadge.className = "inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200";
+                replyBadge.textContent = `${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}`;
+                numberReplies.appendChild(replyBadge);
+            }
             
-            card.append(header, bodyContainer);
+            card.append(header, bodyContainer, numberReplies);
             container.appendChild(card);
         });
+    }
+    
+    async function handleUpdatePost(postId, newBody) {
+        const response = await fetch(`/api/forum-posts/${postId}`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ body: newBody })
+        });
+
+        if (response.ok) {
+            const submitBtn = document.getElementById('submit-post');
+            document.getElementById('body').value = '';
+            delete submitBtn.dataset.editId;
+            submitBtn.innerText = "Post";
+            
+            window.dispatchEvent(new CustomEvent('close-modal', { detail: 'create-post-modal' }));
+            await fetchPosts();
+        }
+    }
+    
+    async function handleDeletePost(postId) {
+        const response = await fetch(`/api/forum-posts/${postId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ is_soft_delete: true })
+        });
+
+        if (response.ok) await fetchPosts();
     }
 
     function renderComments(postId, comments, currentUserId, isAdmin) {
@@ -199,7 +229,10 @@ function initForum(currentUserId, isAdmin) {
         container.innerHTML = '';
 
         if (comments.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-xs italic text-center py-4">No comments yet.</p>';
+            const noComments = document.createElement('p');
+            noComments.className = "text-gray-500 text-xs italic text-center py-4";
+            noComments.textContent = 'No comments yet.';
+            container.appendChild(noComments);
             return;
         }
 
@@ -207,52 +240,70 @@ function initForum(currentUserId, isAdmin) {
             const div = document.createElement('div');
             div.className = "flex flex-col bg-white p-3 rounded-lg border border-gray-100 mb-2 transition-all";
             
+            const header = document.createElement('div');
+            header.className = "flex justify-between items-start mb-2";
+
+            const infoDiv = document.createElement('div');
+            const nameSpan = document.createElement('span');
+            nameSpan.className = "font-bold text-sm text-blue-700 block";
+            nameSpan.textContent = comment.user.name;
+
+            const dateSpan = document.createElement('span');
+            dateSpan.className = "text-[10px] text-gray-500";
+            const postedDate = new Date(comment.created_at).toLocaleDateString() + " " + new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+            dateSpan.textContent = `Posted on ${postedDate}`;
+
+            infoDiv.append(nameSpan, dateSpan);
+
+            const actions = document.createElement('div');
+            actions.className = "comment-actions flex space-x-2";
+
+            header.append(infoDiv, actions);
+            
+            const contentArea = document.createElement('div');
+            contentArea.className = "comment-content-area mt-1";
+
+            const bodyPara = document.createElement('p');
             const isDeleted = comment.is_soft_delete;
-            let bodyContent = comment.body;
+            
             if (isDeleted) {
-                bodyContent = comment.deleted_by_admin ? `Deleted by admin: ${comment.deleted_by_admin}` : "Deleted by user";
+                bodyPara.className = "text-sm leading-relaxed text-gray-400 italic";
+                bodyPara.textContent = comment.deleted_by_admin ? `Deleted by admin: ${comment.deleted_by_admin}` : "Deleted by user";
+            } else {
+                bodyPara.className = "text-sm leading-relaxed text-gray-800";
+                bodyPara.textContent = comment.body;
             }
 
-            const bodyClass = isDeleted ? "text-gray-400 italic" : "text-gray-800";
-            const postedDate = new Date(comment.created_at).toLocaleDateString() + " " + new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-
-            div.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <span class="font-bold text-sm text-blue-700 block">${comment.user.name}</span>
-                        <span class="text-[10px] text-gray-500">Posted on ${postedDate}</span>
-                    </div>
-                    <div class="comment-actions flex space-x-2"></div>
-                </div>
-                <div class="comment-content-area mt-1">
-                    <p class="text-sm leading-relaxed ${bodyClass}">
-                        ${bodyContent}
-                    </p>
-                </div>
-            `;
-
-            const actions = div.querySelector('.comment-actions');
-            const contentArea = div.querySelector('.comment-content-area');
-
+            contentArea.appendChild(bodyPara);
+            div.append(header, contentArea);
+            
             if (!isDeleted) {
                 if (comment.user_id === currentUserId) {
                     const editBtn = document.createElement('button');
                     editBtn.className = "text-[10px] font-medium text-blue-600 hover:text-blue-800 hover:underline transition";
                     editBtn.textContent = "Edit";
                     editBtn.onclick = () => {
-                        contentArea.innerHTML = `
-                            <textarea class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none mt-2">${comment.body}</textarea>
-                            <div class="flex space-x-2 mt-2">
-                                <button class="save-btn px-3 py-1 bg-blue-600 text-white text-[10px] rounded-md border border-blue-600">Save</button>
-                                <button class="cancel-btn px-3 py-1 bg-white text-gray-600 text-[10px] rounded-md border border-gray-300">Cancel</button>
-                            </div>
-                        `;
+                        contentArea.innerHTML = '';
                         
-                        contentArea.querySelector('.save-btn').onclick = () => 
-                            handleUpdateComment(postId, comment.id, contentArea.querySelector('textarea').value);
-                        
-                        contentArea.querySelector('.cancel-btn').onclick = () => 
-                            refreshComments(postId, currentUserId, isAdmin);
+                        const textarea = document.createElement('textarea');
+                        textarea.className = "w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none mt-2";
+                        textarea.value = comment.body;
+
+                        const btnGroup = document.createElement('div');
+                        btnGroup.className = "flex space-x-2 mt-2";
+
+                        const saveBtn = document.createElement('button');
+                        saveBtn.className = "save-btn px-3 py-1 bg-blue-600 text-white text-[10px] rounded-md border border-blue-600";
+                        saveBtn.textContent = "Save";
+                        saveBtn.onclick = () => handleUpdateComment(postId, comment.id, textarea.value);
+
+                        const cancelBtn = document.createElement('button');
+                        cancelBtn.className = "cancel-btn px-3 py-1 bg-white text-gray-600 text-[10px] rounded-md border border-gray-300";
+                        cancelBtn.textContent = "Cancel";
+                        cancelBtn.onclick = () => refreshComments(postId, currentUserId, isAdmin);
+
+                        btnGroup.append(saveBtn, cancelBtn);
+                        contentArea.append(textarea, btnGroup);
                     };
                     actions.appendChild(editBtn);
                 }
@@ -269,6 +320,7 @@ function initForum(currentUserId, isAdmin) {
                     actions.appendChild(deleteBtn);
                 }
             }
+
             container.appendChild(div);
         });
     }
