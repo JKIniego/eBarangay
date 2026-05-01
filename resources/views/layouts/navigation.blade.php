@@ -23,7 +23,7 @@
                             {{ __('Announcements') }}
                         </x-nav-link>
                     @endif
-                    <x-nav-link :href="route('forum.index')" :active="request()->routeIs('forum.index')">
+                    <x-nav-link :href="route('forum.getPosts')" :active="request()->routeIs('forum.getPosts')">
                         {{ __('Forum') }}
                     </x-nav-link>
                     <x-nav-link :href="route('complaints.index')" :active="request()->routeIs('complaints.index')">
@@ -102,7 +102,7 @@
                     {{ __('Announcements') }}
                 </x-responsive-nav-link>
             @endif
-            <x-responsive-nav-link :href="route('forum.index')" :active="request()->routeIs('forum.index')">
+            <x-responsive-nav-link :href="route('forum.getPosts')" :active="request()->routeIs('forum.getPosts')">
                 {{ __('Forum') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('complaints.index')" :active="request()->routeIs('complaints.index')">

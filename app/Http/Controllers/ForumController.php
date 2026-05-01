@@ -9,7 +9,7 @@ use Illuminate\View\View;
 
 class ForumController extends Controller
 {
-    public function index(Request $request)
+    public function getPosts(Request $request)
     {
         $query = $request->query('search');
 
@@ -28,7 +28,7 @@ class ForumController extends Controller
         return view('forum', compact('posts'));
     }
     
-    public function store(Request $request)
+    public function storePost(Request $request)
     {
         $validated = $request->validate([
             'body' => 'required|string|min:3', 
@@ -39,7 +39,7 @@ class ForumController extends Controller
         return response()->json($post, 201);
     }
 
-    public function update(Request $request, ForumPost $forumPost)
+    public function updatePost(Request $request, ForumPost $forumPost)
     {
         if ($request->user()->id !== $forumPost->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -54,7 +54,7 @@ class ForumController extends Controller
         return response()->json(['message' => 'Updated']);
     }
 
-    public function soft_delete(Request $request, ForumPost $forumPost)
+    public function softDeletePost(Request $request, ForumPost $forumPost)
     {
         if ($request->user()->role !== 'admin' && $request->user()->id !== $forumPost->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -111,7 +111,7 @@ class ForumController extends Controller
         return response()->json(['message' => 'Reply updated']);
     }
 
-    public function destroyComment(Request $request, ForumPost $forumPost, ForumComment $forumComment)
+    public function softDeleteComment(Request $request, ForumPost $forumPost, ForumComment $forumComment)
     {
         if ($forumComment->forum_post_id !== $forumPost->id) {
             return response()->json(['message' => 'Comment not found in this post'], 404);

@@ -30,7 +30,7 @@ Route::get('/bulletin/{announcement}', [AnnouncementController::class, 'bulletin
 
 Route::get('/forum', function () {
     return view('forum');
-})->middleware(['auth', 'verified'])->name('forum.index');
+})->middleware(['auth', 'verified'])->name('forum.getPosts');
 
 Route::get('/complaints', function () {
     return view('complaints');
@@ -47,9 +47,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
-    Route::get('/api/forum-posts', [ForumController::class, 'index']);
-    Route::post('/api/forum-posts', [ForumController::class, 'store']); 
+    Route::get('/forum', [ForumController::class, 'getPosts'])->name('forum.getPosts');
+    Route::get('/api/forum-posts', [ForumController::class, 'getPosts']);
+    Route::post('/api/forum-posts', [ForumController::class, 'storePost']); 
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
