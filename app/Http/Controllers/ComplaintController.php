@@ -3,23 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Complaint;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 
 class ComplaintController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $complaints = Complaint::where('user_id', $request->user()->id)
             ->latest()
             ->paginate(5);
 
+        // If JS requests just the data (e.g., for auto-refreshing the table later)
+        if ($request->wantsJson()) {
+            return response()->json($complaints);
+        }
+
         return view('complaints', compact('complaints'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'subject'     => ['required', 'string', 'max:255'],
@@ -34,7 +37,7 @@ class ComplaintController extends Controller
                 ->store('complaint-attachments', 'public');
         }
 
-        Complaint::create([
+        $complaint = Complaint::create([
             'user_id'         => $request->user()->id,
             'reference_no'    => 'CMP-' . strtoupper(Str::random(8)),
             'subject'         => $validated['subject'],
@@ -45,19 +48,32 @@ class ComplaintController extends Controller
             'priority'        => 'normal',
         ]);
 
+        // API/AJAX Response
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Your complaint has been submitted. We will get back to you shortly.',
+                'complaint' => $complaint
+            ], 201);
+        }
+
+        // Standard Web Response
         return redirect()
             ->route('complaints.index')
             ->with('success', 'Your complaint has been submitted. We will get back to you shortly.');
     }
 
-    public function show(Request $request, Complaint $complaint): View
+    public function show(Request $request, Complaint $complaint)
     {
         $this->ensureOwnership($request, $complaint);
+
+        if ($request->wantsJson()) {
+            return response()->json($complaint);
+        }
 
         return view('complaints.show', compact('complaint'));
     }
 
-    public function resolve(Request $request, Complaint $complaint): RedirectResponse
+    public function resolve(Request $request, Complaint $complaint)
     {
         $this->ensureOwnership($request, $complaint);
 
@@ -66,6 +82,15 @@ class ComplaintController extends Controller
             'resolved_at' => now(),
         ]);
 
+        // API/AJAX Response
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Complaint marked as resolved.',
+                'complaint' => $complaint
+            ], 200);
+        }
+
+        // Standard Web Response
         return redirect()
             ->route('complaints.index')
             ->with('success', 'Complaint marked as resolved.');

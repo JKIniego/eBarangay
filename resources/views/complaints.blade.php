@@ -19,29 +19,23 @@
                 <div class="p-8">
                     <h2 class="text-base font-semibold text-gray-800 mb-5">File a Complaint</h2>
 
-                    @if (session('success'))
-                        <div class="mb-5 flex items-start gap-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
-                            <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            {{ session('success') }}
-                        </div>
-                    @endif
+                    <!-- AJAX Success Message Container (Hidden by default) -->
+                    <div id="ajax-success" class="hidden mb-5 flex items-start gap-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+                        <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span id="ajax-success-text"></span>
+                    </div>
 
-                    @if ($errors->any())
-                        <div class="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-                            <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                            </svg>
-                            <ul class="list-disc list-inside space-y-0.5">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                    <!-- AJAX Error Message Container (Hidden by default) -->
+                    <div id="ajax-errors" class="hidden mb-5 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                        <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                        </svg>
+                        <ul id="ajax-error-list" class="list-disc list-inside space-y-0.5"></ul>
+                    </div>
 
-                    <form method="POST" action="{{ route('complaints.store') }}" enctype="multipart/form-data" class="space-y-5">
+                    <form id="complaint-form" method="POST" action="{{ route('complaints.store') }}" enctype="multipart/form-data" class="space-y-5">
                         @csrf
 
                         {{-- Subject --}}
@@ -96,13 +90,14 @@
 
                         <div class="pt-1 flex justify-center">
                             <button
+                                id="submit-btn"
                                 type="submit"
                                 class="w-[90%] inline-flex shrink justify-center items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors duration-150"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                 </svg>
-                                Send
+                                <span id="submit-text">Send</span>
                             </button>
                         </div>
                     </form>
@@ -205,4 +200,65 @@
 
         </div>
     </div>
+
+    <!-- The AJAX Script -->
+    <script>
+    document.getElementById('complaint-form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Stop standard reload
+
+        const form = this;
+        const submitBtn = document.getElementById('submit-btn');
+        const submitText = document.getElementById('submit-text');
+        const successBox = document.getElementById('ajax-success');
+        const errorBox = document.getElementById('ajax-errors');
+        const errorList = document.getElementById('ajax-error-list');
+
+        // Reset UI
+        successBox.classList.add('hidden');
+        errorBox.classList.add('hidden');
+        errorList.innerHTML = '';
+        submitBtn.disabled = true;
+        submitText.innerText = 'Sending...';
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                },
+                body: new FormData(form)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('ajax-success-text').innerText = data.message;
+                successBox.classList.remove('hidden');
+                form.reset();
+
+                // Reloads page after 2 seconds to show the new data in the table below
+                setTimeout(() => window.location.reload(), 2000);
+            } else if (response.status === 422) {
+                for (const field in data.errors) {
+                    data.errors[field].forEach(msg => {
+                        const li = document.createElement('li');
+                        li.innerText = msg;
+                        errorList.appendChild(li);
+                    });
+                }
+                errorBox.classList.remove('hidden');
+            } else {
+                alert('Something went wrong. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('A network error occurred.');
+        } finally {
+            submitBtn.disabled = false;
+            submitText.innerText = 'Send';
+        }
+    });
+    </script>
 </x-app-layout>
