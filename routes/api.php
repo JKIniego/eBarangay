@@ -27,3 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/forum-posts/{forumPost}/comments/{forumComment}', [ForumController::class, 'updateComment']);
     Route::delete('/forum-posts/{forumPost}/comments/{forumComment}', [ForumController::class, 'softDeleteComment']);
 });
+
+
+// API for Announcements
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/announcements', [App\Http\Controllers\AnnouncementController::class, 'apiIndex']);
+    Route::post('/announcements', [App\Http\Controllers\AnnouncementController::class, 'apiStore']);
+    
+    Route::patch('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'apiUpdate']);
+    Route::delete('/announcements/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'apiDestroy']);
+});

@@ -7,6 +7,7 @@ use App\Models\Announcement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 
 class AnnouncementController extends Controller
 {
@@ -91,5 +92,71 @@ class AnnouncementController extends Controller
     public function bulletinShow(Announcement $announcement)
     {
         return view('bulletin-show', compact('announcement'));
+    }
+
+    // API Endpoints for AJAX
+    public function apiIndex(Request $request): JsonResponse
+    {
+        $announcements = Announcement::with('user')
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'data' => $announcements->items(),
+            'pagination' => [
+                'total' => $announcements->total(),
+                'per_page' => $announcements->perPage(),
+                'current_page' => $announcements->currentPage(),
+                'last_page' => $announcements->lastPage(),
+                'has_more' => $announcements->hasMorePages(),
+            ],
+        ]);
+    }
+
+    public function apiStore(AnnouncementRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $data['user_id'] = $request->user()->id;
+        $data['published_at'] = $request->boolean('is_published') ? now() : null;
+
+        $announcement = Announcement::create($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Announcement created successfully.',
+            'data' => $announcement->load('user'),
+        ], 201);
+    }
+
+    public function apiUpdate(AnnouncementRequest $request, Announcement $announcement): JsonResponse
+    {
+        $this->ensureOwnership($request, $announcement);
+
+        $data = $request->validated();
+        $data['published_at'] = $request->boolean('is_published')
+            ? ($announcement->published_at ?? now())
+            : null;
+
+        $announcement->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Announcement updated successfully.',
+            'data' => $announcement->fresh()->load('user'),
+        ]);
+    }
+
+    public function apiDestroy(Request $request, Announcement $announcement): JsonResponse
+    {
+        $this->ensureOwnership($request, $announcement);
+
+        $announcement->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Announcement deleted successfully.',
+        ]);
     }
 }
