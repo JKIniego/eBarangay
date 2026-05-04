@@ -17,4 +17,9 @@ class ForumComment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function editHistory()
+    {
+        return $this->hasMany(EditHistoryForumComment::class);
+    }
 }

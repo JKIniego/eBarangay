@@ -16,6 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::patch('/forum-posts/{forumPost}', [ForumController::class, 'updatePost']);
     Route::delete('/forum-posts/{forumPost}', [ForumController::class, 'softDeletePost']);
+    Route::get('/forum-posts/{forumPost}/history', [ForumController::class, 'getForumPostEditHistory']);
 });
 
 
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::patch('/forum-posts/{forumPost}/comments/{forumComment}', [ForumController::class, 'updateComment']);
     Route::delete('/forum-posts/{forumPost}/comments/{forumComment}', [ForumController::class, 'softDeleteComment']);
+    Route::get('/forum-posts/{forumPost}/comments/{forumComment}/history', [ForumController::class, 'getForumCommentEditHistory']);
 });
 
 

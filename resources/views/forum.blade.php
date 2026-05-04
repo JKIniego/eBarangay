@@ -64,6 +64,7 @@
             initForum(currentUserId, isAdmin);
         });
     </script>
+
     <x-modal name="create-post-modal" focusable>
         <form id="create-post-form" class="p-6">
             @csrf
@@ -101,8 +102,7 @@
 
     <x-modal name="reply-modal" focusable>
         <div class="p-6 h-full flex flex-col">
-            <div id="modal-original-post" class="mb-6 pb-6 border-b border-gray-200">
-                </div>
+            <div id="modal-original-post" class="mb-6 pb-6 border-b border-gray-200"></div>
 
             <h3 class="text-sm font-bold text-gray-700 mb-3">Comments</h3>
             <div id="comments-list" class="max-h-60 overflow-y-auto mb-4 space-y-3 bg-gray-50 p-4 rounded-xl">
@@ -120,6 +120,26 @@
                     <x-primary-button type="submit">Post Reply</x-primary-button>
                 </div>
             </form>
+        </div>
+    </x-modal>
+
+    <x-modal name="view-post-edit-history-modal">
+        <div class="p-6 h-full flex flex-col">
+            <div id="modal-original-post-edit" class="mb-6 pb-6 border-b border-gray-200"></div>
+
+            <h3 class="text-sm font-bold text-gray-700 mb-3">Edit History</h3>
+            <div id="post-edit-history-list" class="max-h-60 overflow-y-auto mb-4 space-y-3 bg-gray-50 p-4 rounded-xl">
+                </div>
+        </div>
+    </x-modal>
+
+    <x-modal name="view-comment-edit-history-modal">
+        <div class="p-6 h-full flex flex-col">
+            <div id="modal-original-comment-edit" class="mb-6 pb-6 border-b border-gray-200"></div>
+
+            <h3 class="text-sm font-bold text-gray-700 mb-3">Edit History</h3>
+            <div id="comment-edit-history-list" class="max-h-60 overflow-y-auto mb-4 space-y-3 bg-gray-50 p-4 rounded-xl">
+                </div>
         </div>
     </x-modal>
 </x-app-layout>

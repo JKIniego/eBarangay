@@ -17,4 +17,9 @@ class ForumPost extends Model
     {
         return $this->hasMany(ForumComment::class);
     }
+
+    public function editHistory()
+    {
+        return $this->hasMany(EditHistoryForumPost::class);
+    }
 }

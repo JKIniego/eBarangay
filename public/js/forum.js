@@ -29,42 +29,9 @@ function initForum(currentUserId, isAdmin) {
             card.className = "group border border-gray-200 rounded-xl p-4 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 mb-3 cursor-pointer";
             
             const triggerReplyModal = async () => {
-                const originalPostContainer = document.getElementById('modal-original-post');
+                renderOriginalContentInModal('modal-original-post', post);
                 const commentsContainer = document.getElementById('comments-list');
                 const replyForm = document.getElementById('reply-form');
-                
-                originalPostContainer.textContent = '';
-                
-                const avatarInitials = post.user.name.substring(0, 2).toUpperCase();
-                const formattedDate = `Posted on ${new Date(post.created_at).toLocaleDateString()} ${new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-
-                const headerDiv = document.createElement('div');
-                headerDiv.className = "flex items-center mb-4";
-
-                const avatar = document.createElement('div');
-                avatar.className = "h-12 w-12 rounded-full border-2 border-black flex items-center justify-center bg-white text-black font-bold mr-4 shrink-0";
-                avatar.textContent = avatarInitials;
-
-                const infoDiv = document.createElement('div');
-                const nameH4 = document.createElement('h4');
-                nameH4.className = "text-xl font-bold text-gray-900";
-                nameH4.textContent = post.user.name;
-
-                const dateP = document.createElement('p');
-                dateP.className = "text-sm text-gray-500";
-                dateP.textContent = formattedDate;
-
-                infoDiv.append(nameH4, dateP);
-                headerDiv.append(avatar, infoDiv);
-
-                const bodyDiv = document.createElement('div');
-                bodyDiv.className = "mt-2";
-                const bodyP = document.createElement('p');
-                bodyP.className = "text-gray-900 text-lg leading-relaxed";
-                bodyP.textContent = post.body;
-                bodyDiv.appendChild(bodyP);
-
-                originalPostContainer.append(headerDiv, bodyDiv);
                 
                 replyForm.dataset.postId = post.id;
                 commentsContainer.textContent = '';
@@ -122,25 +89,25 @@ function initForum(currentUserId, isAdmin) {
             };
             actions.appendChild(replyBtn);
 
+            const menuWrapper = document.createElement('div');
+            menuWrapper.className = "relative";
+            menuWrapper.onclick = (e) => e.stopPropagation();
+            
+            const menuBtn = document.createElement('button');
+            menuBtn.className = "p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150";
+            menuBtn.setAttribute('aria-label', 'Post options');
+            menuBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+            </svg>`;
+
+            const dropdown = document.createElement('div');
+            dropdown.className = "hidden absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 overflow-hidden";
+
             const isDeleted = post.is_soft_delete || post.body === "Deleted by user";
             const canEdit = !isDeleted && post.user_id === currentUserId;
             const canDelete = !isDeleted && (isAdmin || post.user_id === currentUserId);
 
             if (canEdit || canDelete) {
-                const menuWrapper = document.createElement('div');
-                menuWrapper.className = "relative";
-                menuWrapper.onclick = (e) => e.stopPropagation();
-                
-                const menuBtn = document.createElement('button');
-                menuBtn.className = "p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150";
-                menuBtn.setAttribute('aria-label', 'Post options');
-                menuBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
-                    <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
-                </svg>`;
-                
-                const dropdown = document.createElement('div');
-                dropdown.className = "hidden absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 overflow-hidden";
-
                 if (canEdit) {
                     const editItem = document.createElement('button');
                     editItem.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-700 hover:bg-blue-50 transition-colors";
@@ -148,7 +115,8 @@ function initForum(currentUserId, isAdmin) {
                         <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
                         <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
                     </svg><span>Edit</span>`;
-                    editItem.onclick = () => {
+                    editItem.onclick = (e) => {
+                        e.stopPropagation();
                         dropdown.classList.add('hidden');
                         const textarea = document.getElementById('body');
                         const submitBtn = document.getElementById('submit-post');
@@ -171,7 +139,8 @@ function initForum(currentUserId, isAdmin) {
                     deleteItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                         <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                     </svg><span>Delete</span>`;
-                    deleteItem.onclick = () => {
+                    deleteItem.onclick = (e) => {
+                        e.stopPropagation();
                         dropdown.classList.add('hidden');
                         if (confirm('Are you sure you want to delete this post?')) {
                             handleDeletePost(post.id);
@@ -179,30 +148,37 @@ function initForum(currentUserId, isAdmin) {
                     };
                     dropdown.appendChild(deleteItem);
                 }
-
-                // const editHistory = document.createElement('button');
-                // editHistory.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors";
-                // editHistory.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                //     <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
-                //     <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
-                //     <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
-                // </svg><span>See Edit History</span>`;
-                // dropdown.appendChild(editHistory);
-                
-                menuBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    document.querySelectorAll('.post-dropdown').forEach(d => {
-                        if (d !== dropdown) d.classList.add('hidden');
-                    });
-                    dropdown.classList.toggle('hidden');
-                };
-                dropdown.classList.add('post-dropdown');
-
-                menuWrapper.append(menuBtn, dropdown);
-                actions.appendChild(menuWrapper);
-                
-                document.addEventListener('click', () => dropdown.classList.add('hidden'));
             }
+
+            const editHistory = document.createElement('button');
+            editHistory.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors";
+            editHistory.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+            </svg><span>See Edit History</span>`;
+            dropdown.onclick = (e) => {
+                e.stopPropagation();
+                dropdown.classList.add('hidden');
+                renderOriginalContentInModal('modal-original-post-edit', post);
+                handleViewPostEditHistory(post.id);
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'view-post-edit-history-modal' }));
+            };
+            dropdown.appendChild(editHistory);
+
+            menuBtn.onclick = (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.post-dropdown').forEach(d => {
+                    if (d !== dropdown) d.classList.add('hidden');
+                });
+                dropdown.classList.toggle('hidden');
+            };
+            dropdown.classList.add('post-dropdown');
+
+            menuWrapper.append(menuBtn, dropdown);
+            actions.appendChild(menuWrapper);
+                
+            document.addEventListener('click', () => dropdown.classList.add('hidden'));
 
             header.append(userInfo, actions);
             
@@ -274,6 +250,62 @@ function initForum(currentUserId, isAdmin) {
         if (response.ok) await fetchPosts();
     }
 
+    async function handleViewPostEditHistory(postId) {
+        const historyContainer = document.getElementById('post-edit-history-list');
+        historyContainer.textContent = '';
+
+        const loading = document.createElement('p');
+        loading.className = "text-sm italic text-gray-400 text-center py-4";
+        loading.textContent = "Fetching edit history...";
+        historyContainer.appendChild(loading);
+
+        try {
+            const response = await fetch(`/api/forum-posts/${postId}/history`, {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch history');
+
+            const history = await response.json();
+            historyContainer.textContent = '';
+
+            if (history.length === 0) {
+                const noHistory = document.createElement('p');
+                noHistory.className = "text-sm text-gray-500 text-center py-4";
+                noHistory.textContent = "This post has not been edited yet.";
+                historyContainer.appendChild(noHistory);
+                return;
+            }
+            
+            history.forEach(item => {
+                const entry = document.createElement('div');
+                entry.className = "p-3 bg-gray-50 rounded-lg border border-gray-100 mb-3";
+
+                const dateHeader = document.createElement('div');
+                dateHeader.className = "flex justify-between items-center mb-2";
+
+                const dateLabel = document.createElement('span');
+                dateLabel.className = "text-[10px] font-bold text-gray-500 uppercase tracking-wider";
+                dateLabel.textContent = `Version from ${new Date(item.created_at).toLocaleDateString()} ${new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+
+                const bodyContent = document.createElement('p');
+                bodyContent.className = "text-sm text-gray-700 whitespace-pre-wrap leading-relaxed";
+                bodyContent.textContent = item.body;
+
+                dateHeader.appendChild(dateLabel);
+                entry.append(dateHeader, bodyContent);
+                historyContainer.appendChild(entry);
+            });
+        } catch (error) {
+            historyContainer.textContent = '';
+            const errorMsg = document.createElement('p');
+            errorMsg.className = "text-sm text-red-500 text-center py-4";
+            errorMsg.textContent = "Error loading edit history.";
+            historyContainer.appendChild(errorMsg);
+            console.error(error);
+        }
+    }
+
     function renderComments(postId, comments, currentUserId, isAdmin) {
         const container = document.getElementById('comments-list');
         container.innerHTML = '';
@@ -326,54 +358,98 @@ function initForum(currentUserId, isAdmin) {
 
             contentArea.appendChild(bodyPara);
             div.append(header, contentArea);
+
+            const dropdown = document.createElement('div');
+            dropdown.className = "hidden absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 overflow-hidden";
+            dropdown.classList.add('comment-dropdown');
             
             if (!isDeleted) {
+                const menuWrapper = document.createElement('div');
+                menuWrapper.className = "relative ml-auto"; // Align to the right
+                menuWrapper.onclick = (e) => e.stopPropagation();
+
+                const menuBtn = document.createElement('button');
+                menuBtn.className = "p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150";
+                menuBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                    <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                </svg>`;
+
                 if (comment.user_id === currentUserId) {
-                    const editBtn = document.createElement('button');
-                    editBtn.className = "flex gap-1 text-[10px] font-medium text-blue-600 hover:text-blue-800 hover:underline transition";
-                    editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                    const editItem = document.createElement('button');
+                    editItem.className = "w-full flex items-center gap-2 px-3 py-2 text-[10px] text-blue-700 hover:bg-blue-50 transition-colors";
+                    editItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
                     </svg><span>Edit</span>`;
-                    editBtn.onclick = () => {
+                    
+                    editItem.onclick = (e) => {
+                        e.stopPropagation();
+                        dropdown.classList.add('hidden');
                         contentArea.innerHTML = '';
-                        
                         const textarea = document.createElement('textarea');
                         textarea.className = "w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none mt-2";
                         textarea.value = comment.body;
 
                         const btnGroup = document.createElement('div');
                         btnGroup.className = "flex space-x-2 mt-2";
-
                         const saveBtn = document.createElement('button');
-                        saveBtn.className = "save-btn px-3 py-1 bg-blue-600 text-white text-[10px] rounded-md border border-blue-600";
+                        saveBtn.className = "px-3 py-1 bg-blue-600 text-white text-[10px] rounded-md";
                         saveBtn.textContent = "Save";
                         saveBtn.onclick = () => handleUpdateComment(postId, comment.id, textarea.value);
 
                         const cancelBtn = document.createElement('button');
-                        cancelBtn.className = "cancel-btn px-3 py-1 bg-white text-gray-600 text-[10px] rounded-md border border-gray-300";
+                        cancelBtn.className = "px-3 py-1 bg-white text-gray-600 text-[10px] rounded-md border";
                         cancelBtn.textContent = "Cancel";
                         cancelBtn.onclick = () => refreshComments(postId, currentUserId, isAdmin);
 
                         btnGroup.append(saveBtn, cancelBtn);
                         contentArea.append(textarea, btnGroup);
                     };
-                    actions.appendChild(editBtn);
+                    dropdown.appendChild(editItem);
                 }
                 
                 if (isAdmin || comment.user_id === currentUserId) {
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.className = "flex gap-1 text-[10px] font-medium text-red-500 hover:text-red-700 hover:underline transition";
-                    deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                    const deleteItem = document.createElement('button');
+                    deleteItem.className = "w-full flex items-center gap-2 px-3 py-2 text-[10px] text-red-500 hover:bg-red-50 transition-colors";
+                    deleteItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                         <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                     </svg><span>Delete</span>`;
-                    deleteBtn.onclick = () => {
+                    
+                    deleteItem.onclick = (e) => {
+                        e.stopPropagation();
+                        dropdown.classList.add('hidden');
                         if (confirm("Are you sure you want to delete this reply?")) {
                             handleDeleteComment(postId, comment.id);
                         }
                     };
-                    actions.appendChild(deleteBtn);
+                    dropdown.appendChild(deleteItem);
                 }
+
+                const editHistory = document.createElement('button');
+                editHistory.className = "w-full flex items-center gap-2 px-3 py-2 text-[10px] text-black-500 hover:bg-black-50 transition-colors";
+                editHistory.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                    <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                    <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                    <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+                </svg><span>See Edit History</span>`;
+                dropdown.onclick = (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.add('hidden');
+                    renderOriginalContentInModal('modal-original-comment-edit', comment, true);
+                    handleViewCommentEditHistory(postId, comment.id);
+                    window.dispatchEvent(new CustomEvent('open-modal', { detail: 'view-comment-edit-history-modal' }));
+                };
+                dropdown.appendChild(editHistory);
+
+                menuBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.comment-dropdown').forEach(d => {
+                        if (d !== dropdown) d.classList.add('hidden');
+                    });
+                    dropdown.classList.toggle('hidden');
+                };
+
+                menuWrapper.append(menuBtn, dropdown);
+                actions.appendChild(menuWrapper);
             }
 
             container.appendChild(div);
@@ -408,6 +484,61 @@ function initForum(currentUserId, isAdmin) {
         if (response.ok) await refreshComments(postId, currentUserId, isAdmin);
     }
 
+    async function handleViewCommentEditHistory(postId, commentId) {
+        const historyContainer = document.getElementById('comment-edit-history-list');
+        historyContainer.textContent = '';
+
+        const loading = document.createElement('p');
+        loading.className = "text-sm italic text-gray-400 text-center py-4";
+        loading.textContent = "Fetching edit history...";
+        historyContainer.appendChild(loading);
+
+        try {
+            const response = await fetch(`/api/forum-posts/${postId}/comments/${commentId}/history`, {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch history');
+
+            const history = await response.json();
+            historyContainer.textContent = '';
+
+            if (history.length === 0) {
+                const noHistory = document.createElement('p');
+                noHistory.className = "text-sm text-gray-500 text-center py-4";
+                noHistory.textContent = "This reply has not been edited yet.";
+                historyContainer.appendChild(noHistory);
+                return;
+            }
+            
+            history.forEach(item => {
+                const entry = document.createElement('div');
+                entry.className = "p-3 bg-gray-50 rounded-lg border border-gray-100 mb-3";
+
+                const dateHeader = document.createElement('div');
+                dateHeader.className = "flex justify-between items-center mb-2";
+
+                const dateLabel = document.createElement('span');
+                dateLabel.className = "text-[10px] font-bold text-gray-500 uppercase tracking-wider";
+                dateLabel.textContent = `Version from ${new Date(item.created_at).toLocaleDateString()} ${new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+
+                const bodyContent = document.createElement('p');
+                bodyContent.className = "text-sm text-gray-700 whitespace-pre-wrap leading-relaxed";
+                bodyContent.textContent = item.body;
+
+                dateHeader.appendChild(dateLabel);
+                entry.append(dateHeader, bodyContent);
+                historyContainer.appendChild(entry);
+            });
+        } catch (error) {
+            historyContainer.textContent = '';
+            const errorMsg = document.createElement('p');
+            errorMsg.className = "text-sm text-red-500 text-center py-4";
+            errorMsg.textContent = "Error loading edit history.";
+            historyContainer.appendChild(errorMsg);
+        }
+    }
+
     async function refreshComments(postId, currentUserId, isAdmin) {
         const response = await fetch(`/api/forum-posts/${postId}/comments`, {
             headers: { 'Accept': 'application/json' }
@@ -416,10 +547,48 @@ function initForum(currentUserId, isAdmin) {
         renderComments(postId, comments, currentUserId, isAdmin);
     }
 
+    function renderOriginalContentInModal(containerId, item, isComment = false) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        container.textContent = '';
+        
+        const avatarInitials = item.user.name.substring(0, 2).toUpperCase();
+        const datePrefix = isComment ? "Originally posted on" : "Posted on";
+        const formattedDate = `${datePrefix} ${new Date(item.created_at).toLocaleDateString()} ${new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = "flex items-center mb-4";
+
+        const avatar = document.createElement('div');
+        avatar.className = "h-12 w-12 rounded-full border-2 border-black flex items-center justify-center bg-white text-black font-bold mr-4 shrink-0";
+        avatar.textContent = avatarInitials;
+
+        const infoDiv = document.createElement('div');
+        const nameH4 = document.createElement('h4');
+        nameH4.className = "text-xl font-bold text-gray-900";
+        nameH4.textContent = item.user.name;
+
+        const dateP = document.createElement('p');
+        dateP.className = "text-sm text-gray-500";
+        dateP.textContent = formattedDate;
+
+        infoDiv.append(nameH4, dateP);
+        headerDiv.append(avatar, infoDiv);
+        
+        const bodyDiv = document.createElement('div');
+        bodyDiv.className = "mt-2";
+        const bodyP = document.createElement('p');
+        bodyP.className = "text-gray-900 text-lg leading-relaxed";
+        bodyP.textContent = item.body;
+        bodyDiv.appendChild(bodyP);
+
+        container.append(headerDiv, bodyDiv);
+    }
+
     function renderPagination(meta) {
         const container = document.getElementById('pagination-links');
-        container.textContent = ''; 
-        console.log(meta);
+        container.textContent = '';
 
         if (meta.last_page <= 1) return;
 

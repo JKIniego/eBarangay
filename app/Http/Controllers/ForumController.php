@@ -49,6 +49,10 @@ class ForumController extends Controller
             'body' => 'required|string|min:3',
         ]);
         
+        $forumPost->editHistory()->create([
+            'body' => $forumPost->body
+        ]);
+        
         $forumPost->update($validated);
         
         return response()->json(['message' => 'Updated']);
@@ -69,6 +73,12 @@ class ForumController extends Controller
         $forumPost->update($updateData);
 
         return response()->json(['message' => 'Post soft deleted']);
+    }
+
+    public function getForumPostEditHistory(Request $request, ForumPost $forumPost) {
+        $history = $forumPost->editHistory()->latest()->get();
+
+        return response()->json($history);
     }
 
     public function getComments(ForumPost $forumPost)
@@ -105,7 +115,14 @@ class ForumController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $validated = $request->validate(['body' => 'required|string']);
+        $validated = $request->validate([
+            'body' => 'required|string|min:3',
+        ]);
+
+        $forumComment->editHistory()->create([
+            'body' => $forumComment->body
+        ]);
+
         $forumComment->update($validated);
         
         return response()->json(['message' => 'Reply updated']);
@@ -130,5 +147,11 @@ class ForumController extends Controller
         $forumComment->update($updateData);
 
         return response()->json(['message' => 'Reply deleted']);
+    }
+
+    public function getForumCommentEditHistory(Request $request, ForumPost $forumPost, ForumComment $forumComment) {
+        $history = $forumComment->editHistory()->latest()->get();
+
+        return response()->json($history);
     }
 }

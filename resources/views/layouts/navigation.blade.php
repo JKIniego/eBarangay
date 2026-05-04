@@ -31,7 +31,7 @@
                     </x-nav-link>
                     @if(Auth::user()->role === 'admin')
                         <x-nav-link :href="route('register')" :active="request()->routeIs('register')">
-                            {{ __('Register User') }}
+                            {{ __('Register') }}
                         </x-nav-link>
                     @endif
                 </div>
