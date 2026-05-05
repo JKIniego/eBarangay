@@ -89,94 +89,101 @@ function initForum(currentUserId, isAdmin) {
             };
             actions.appendChild(replyBtn);
 
-            const menuWrapper = document.createElement('div');
-            menuWrapper.className = "relative";
-            menuWrapper.onclick = (e) => e.stopPropagation();
-            
-            const menuBtn = document.createElement('button');
-            menuBtn.className = "p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150";
-            menuBtn.setAttribute('aria-label', 'Post options');
-            menuBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
-                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
-            </svg>`;
-
-            const dropdown = document.createElement('div');
-            dropdown.className = "hidden absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 overflow-hidden";
-
             const isDeleted = post.is_soft_delete || post.body === "Deleted by user";
             const canEdit = !isDeleted && post.user_id === currentUserId;
             const canDelete = !isDeleted && (isAdmin || post.user_id === currentUserId);
 
-            if (canEdit || canDelete) {
-                if (canEdit) {
-                    const editItem = document.createElement('button');
-                    editItem.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-700 hover:bg-blue-50 transition-colors";
-                    editItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                    </svg><span>Edit</span>`;
-                    editItem.onclick = (e) => {
-                        e.stopPropagation();
-                        dropdown.classList.add('hidden');
-                        const textarea = document.getElementById('body');
-                        const submitBtn = document.getElementById('submit-post');
-                        textarea.value = post.body;
-                        submitBtn.dataset.editId = post.id;
-                        submitBtn.innerText = "Update Post";
-                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'create-post-modal' }));
-                    };
-                    dropdown.appendChild(editItem);
-                }
+            if (!isDeleted) {
+                const menuWrapper = document.createElement('div');
+                menuWrapper.className = "relative";
+                menuWrapper.onclick = (e) => e.stopPropagation();
+                
+                const menuBtn = document.createElement('button');
+                menuBtn.className = "p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-150";
+                menuBtn.setAttribute('aria-label', 'Post options');
+                menuBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                    <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                </svg>`;
 
-                if (canDelete) {
+                const dropdown = document.createElement('div');
+                dropdown.className = "hidden absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 overflow-hidden";
+
+                if (canEdit || canDelete) {
                     if (canEdit) {
-                        const divider = document.createElement('div');
-                        divider.className = "mx-3 border-t border-gray-100";
-                        dropdown.appendChild(divider);
+                        const editItem = document.createElement('button');
+                        editItem.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-700 hover:bg-blue-50 transition-colors";
+                        editItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                        </svg><span>Edit</span>`;
+                        editItem.onclick = (e) => {
+                            e.stopPropagation();
+                            dropdown.classList.add('hidden');
+                            const textarea = document.getElementById('body');
+                            const submitBtn = document.getElementById('submit-post');
+                            textarea.value = post.body;
+                            submitBtn.dataset.editId = post.id;
+                            submitBtn.innerText = "Update Post";
+                            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'create-post-modal' }));
+                        };
+                        dropdown.appendChild(editItem);
                     }
-                    const deleteItem = document.createElement('button');
-                    deleteItem.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors";
-                    deleteItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                        <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                    </svg><span>Delete</span>`;
-                    deleteItem.onclick = (e) => {
-                        e.stopPropagation();
-                        dropdown.classList.add('hidden');
-                        if (confirm('Are you sure you want to delete this post?')) {
-                            handleDeletePost(post.id);
+
+                    if (canDelete) {
+                        if (canEdit) {
+                            const divider = document.createElement('div');
+                            divider.className = "mx-3 border-t border-gray-100";
+                            dropdown.appendChild(divider);
                         }
-                    };
-                    dropdown.appendChild(deleteItem);
+                        const deleteItem = document.createElement('button');
+                        deleteItem.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors";
+                        deleteItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                        </svg><span>Delete</span>`;
+                        deleteItem.onclick = (e) => {
+                            e.stopPropagation();
+                            dropdown.classList.add('hidden');
+                            
+                            const confirmBtn = document.getElementById('confirm-delete-btn');
+                            confirmBtn.onclick = () => {
+                                handleDeletePost(post.id);
+                                window.dispatchEvent(new CustomEvent('close-modal', { detail: 'confirm-delete-modal' }));
+                            };
+                            
+                            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'confirm-delete-modal' }));
+                        };
+                        dropdown.appendChild(deleteItem);
+                    }
                 }
+
+                const editHistory = document.createElement('button');
+                editHistory.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors";
+                editHistory.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                    <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                    <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                    <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+                </svg><span>See Edit History</span>`;
+                dropdown.onclick = (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.add('hidden');
+                    renderOriginalContentInModal('modal-original-post-edit', post);
+                    handleViewPostEditHistory(post.id);
+                    window.dispatchEvent(new CustomEvent('open-modal', { detail: 'view-post-edit-history-modal' }));
+                };
+                dropdown.appendChild(editHistory);
+
+                menuBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.post-dropdown').forEach(d => {
+                        if (d !== dropdown) d.classList.add('hidden');
+                    });
+                    dropdown.classList.toggle('hidden');
+                };
+                dropdown.classList.add('post-dropdown');
+
+                menuWrapper.append(menuBtn, dropdown);
+                actions.appendChild(menuWrapper);
             }
-
-            const editHistory = document.createElement('button');
-            editHistory.className = "w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors";
-            editHistory.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
-                <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
-                <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
-            </svg><span>See Edit History</span>`;
-            dropdown.onclick = (e) => {
-                e.stopPropagation();
-                dropdown.classList.add('hidden');
-                renderOriginalContentInModal('modal-original-post-edit', post);
-                handleViewPostEditHistory(post.id);
-                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'view-post-edit-history-modal' }));
-            };
-            dropdown.appendChild(editHistory);
-
-            menuBtn.onclick = (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.post-dropdown').forEach(d => {
-                    if (d !== dropdown) d.classList.add('hidden');
-                });
-                dropdown.classList.toggle('hidden');
-            };
-            dropdown.classList.add('post-dropdown');
-
-            menuWrapper.append(menuBtn, dropdown);
-            actions.appendChild(menuWrapper);
                 
             document.addEventListener('click', () => dropdown.classList.add('hidden'));
 
@@ -417,9 +424,14 @@ function initForum(currentUserId, isAdmin) {
                     deleteItem.onclick = (e) => {
                         e.stopPropagation();
                         dropdown.classList.add('hidden');
-                        if (confirm("Are you sure you want to delete this reply?")) {
+                        
+                        const confirmBtn = document.getElementById('confirm-delete-btn');
+                        confirmBtn.onclick = () => {
                             handleDeleteComment(postId, comment.id);
-                        }
+                            window.dispatchEvent(new CustomEvent('close-modal', { detail: 'confirm-delete-modal' }));
+                        };
+                        
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'confirm-delete-modal' }));
                     };
                     dropdown.appendChild(deleteItem);
                 }
