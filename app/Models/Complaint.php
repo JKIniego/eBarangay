@@ -26,13 +26,19 @@ class Complaint extends Model
         'resolved_at' => 'datetime',
     ];
 
-    public function user(): BelongsTo
+    public function replies()
+    {
+        // oldest first so the chat thread reads top-to-bottom chronologically
+        return $this->hasMany(ComplaintReply::class)->with('user')->oldest();
+    }
+
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function replies(): HasMany
+    public function statusLogs()
     {
-        return $this->hasMany(ComplaintReply::class);
+        return $this->hasMany(ComplaintStatusLog::class)->with('user')->latest();
     }
 }

@@ -691,5 +691,41 @@ function initForum(currentUserId, isAdmin) {
         }
     });
     
-    fetchPosts();
+    fetchPosts().then(() => {
+        const params = new URLSearchParams(window.location.search);
+
+        const openPostId = params.get('open_post');
+        if (openPostId) {
+            // Find the post in the already-rendered data and trigger its modal
+            fetch(`/api/forum-posts?per_page=100`, { headers: { 'Accept': 'application/json' } })
+                .then(r => r.json())
+                .then(result => {
+                    const post = result.data.find(p => String(p.id) === String(openPostId));
+                    if (post) {
+                        // Simulate clicking that post card — reuse the modal trigger logic
+                        renderOriginalContentInModal('modal-original-post', post);
+                        const commentsContainer = document.getElementById('comments-list');
+                        const replyForm = document.getElementById('reply-form');
+                        replyForm.dataset.postId = post.id;
+                        commentsContainer.innerHTML = '<p class="text-gray-400 text-sm italic py-4 flex justify-center">Loading comments...</p>';
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'reply-modal' }));
+                        fetch(`/api/forum-posts/${post.id}/comments`, { headers: { 'Accept': 'application/json' } })
+                            .then(r => r.json())
+                            .then(comments => renderComments(post.id, comments, currentUserId, isAdmin));
+                    }
+                });
+        }
+
+        if (params.get('new_post') === '1') {
+            document.getElementById('body').value = '';
+            document.getElementById('submit-post').dataset.editId = '';
+            document.getElementById('submit-post').innerText = 'Post to Forum';
+            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'create-post-modal' }));
+        }
+
+        // Clean the URL so refreshing doesn't re-open the modal
+        if (openPostId || params.get('new_post')) {
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    });
 }

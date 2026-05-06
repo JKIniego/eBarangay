@@ -28,10 +28,6 @@ Route::get('/dashboard', function () {
 Route::get('/bulletin', [AnnouncementController::class, 'bulletin'])->name('bulletin.index');
 Route::get('/bulletin/{announcement}', [AnnouncementController::class, 'bulletinShow'])->name('bulletin.show');
 
-Route::get('/forum', function () {
-    return view('forum');
-})->middleware(['auth', 'verified'])->name('forum.getPosts');
-
 Route::get('/complaints', function () {
     return view('complaints');
 })->middleware(['auth', 'verified'])->name('complaints.index');
@@ -47,16 +43,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/forum', [ForumController::class, 'getPosts'])->name('forum.getPosts');
+    Route::get('/forum', [ForumController::class, 'index'])->name('forum.getPosts');
     Route::get('/api/forum-posts', [ForumController::class, 'getPosts']);
-    Route::post('/api/forum-posts', [ForumController::class, 'storePost']); 
+    Route::post('/api/forum-posts', [ForumController::class, 'storePost']);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/complaints', [ComplaintController::class, 'index']) ->name('complaints.index');
-    Route::post('/complaints', [ComplaintController::class, 'store']) ->name('complaints.store');
-    Route::get('/complaints/{complaint}', [ComplaintController::class, 'show']) ->name('complaints.show');
+    Route::get('/complaints', [ComplaintController::class, 'index'])->name('complaints.index');
+    Route::post('/complaints', [ComplaintController::class, 'store'])->name('complaints.store');
+    Route::get('/complaints/{complaint}', [ComplaintController::class, 'show'])->name('complaints.show');
     Route::patch('/complaints/{complaint}/resolve', [ComplaintController::class, 'resolve'])->name('complaints.resolve');
+    Route::get('/complaint-management', [ComplaintController::class, 'adminIndex'])->name('complaints.admin');
+    Route::post('/complaints/{complaint}/reply', [ComplaintController::class, 'reply'])->name('complaints.reply');
 });
 
 require __DIR__.'/auth.php';

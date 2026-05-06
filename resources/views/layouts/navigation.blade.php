@@ -29,6 +29,11 @@
                     <x-nav-link :href="route('complaints.index')" :active="request()->routeIs('complaints.index')">
                         {{ __('Complaints') }}
                     </x-nav-link>
+                    @if(auth()->user()->role === 'admin')
+                        <x-nav-link :href="route('complaints.admin')" :active="request()->routeIs('complaints.admin')">
+                            {{ __('Complaint Management') }}
+                        </x-nav-link>
+                    @endif
                     @if(Auth::user()->role === 'admin')
                         <x-nav-link :href="route('register')" :active="request()->routeIs('register')">
                             {{ __('Register') }}
@@ -108,6 +113,11 @@
             <x-responsive-nav-link :href="route('complaints.index')" :active="request()->routeIs('complaints.index')">
                 {{ __('Complaints') }}
             </x-responsive-nav-link>
+            @if(auth()->user()->role === 'admin')
+                <x-responsive-nav-link :href="route('complaints.admin')" :active="request()->routeIs('complaints.admin')">
+                    {{ __('Complaint Management') }}
+                </x-nav-link>
+            @endif
             @if(Auth::user()->role === 'admin')
                 <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">
                     {{ __('Register') }}

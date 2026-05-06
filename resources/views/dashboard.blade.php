@@ -6,7 +6,6 @@
     </x-slot>
 
     @php
-        // Colors for announcement cards, will cycle through based on announcement ID
         $colors = [
             ['bg' => 'bg-green-50',  'text' => 'text-green-700',  'border' => 'border-green-200',  'bar' => 'bg-green-400'],
             ['bg' => 'bg-blue-50',   'text' => 'text-blue-700',   'border' => 'border-blue-200',   'bar' => 'bg-blue-400'],
@@ -20,30 +19,25 @@
     <div id="board" class="py-10 scroll-mt-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            {{-- Bulletin Board Container --}}
+            {{-- Bulletin Board --}}
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-
-                {{-- Board Header --}}
                 <div class="bg-gray-50 border-b border-gray-200 px-8 py-5 flex items-center justify-between">
                     <div>
                         <h1 class="text-xl font-semibold text-gray-900">Bulletin Board</h1>
                         <p class="text-sm text-gray-500 mt-0.5">Latest announcements from Barangay 67</p>
                     </div>
                 </div>
-
                 <div class="p-8">
-                    {{-- Announcements Grid --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        
                         @forelse ($announcements as $index => $announcement)
                             @php
                                 $c = $colors[$announcement->id % count($colors)];
                                 $delay = $index * 40;
-                                $featuredClass = $announcement->is_featured 
-                                    ? 'border-yellow-400 //ring-2 //ring-yellow-200 //bg-yellow-50' 
-                                    : 'border-gray-200';
+                                $featuredClass = $announcement->is_featured ? 'border-yellow-400' : 'border-gray-200';
                             @endphp
-                            <a href="{{ route('bulletin.show', $announcement) }}" class="group relative bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 {{ $featuredClass }}" style="animation-delay: {{ $delay }}ms">                            
+                            <a href="{{ route('bulletin.show', $announcement) }}"
+                               class="group relative bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 {{ $featuredClass }}"
+                               style="animation-delay: {{ $delay }}ms">
                                 @if($announcement->is_featured)
                                     <div class="absolute top-0 right-0 z-20 w-0 h-0 border-t-[44px] border-l-[44px] border-t-yellow-400 border-l-transparent"></div>
                                     <div class="absolute top-1 right-1 z-30">
@@ -65,9 +59,7 @@
                                     <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-md {{ $announcement->is_featured ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' : $c['bg'].' '.$c['text'].' border '.$c['border'] }} mb-2">
                                         {{ $announcement->is_featured ? '★ Featured Update ★' : 'Barangay Update' }}
                                     </span>
-                                    <p class="text-sm font-semibold text-gray-800 leading-snug line-clamp-2">
-                                        {{ $announcement->title }}
-                                    </p>
+                                    <p class="text-sm font-semibold text-gray-800 leading-snug line-clamp-2">{{ $announcement->title }}</p>
                                     <p class="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -77,16 +69,15 @@
                                 </div>
                             </a>
 
-                            <template id="modal-data-{{ $announcement->id }}" 
+                            <template id="modal-data-{{ $announcement->id }}"
                                 data-title="{{ $announcement->title }}"
                                 data-date="{{ $announcement->published_at ? $announcement->published_at->format('F j, Y') : 'Date not available' }}"
                                 data-content="{{ e($announcement->body) }}"
                                 data-featured="{{ $announcement->is_featured ? 'true' : 'false' }}"
                                 data-color-bg="{{ $c['bg'] }}"
                                 data-color-text="{{ $c['text'] }}"
-                                data-color-bar="{{ $c['bar'] }}"
-                            ></template>
-
+                                data-color-bar="{{ $c['bar'] }}">
+                            </template>
                         @empty
                             <div class="col-span-1 sm:col-span-2 lg:col-span-4 text-center py-20 text-gray-400">
                                 <svg class="mx-auto mb-3 w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,89 +87,98 @@
                             </div>
                         @endforelse
                     </div>
-
                     @if($announcements->hasPages())
-                        <div class="mt-8 pt-6 border-t border-gray-100">
-                            {{ $announcements->links() }}
-                        </div>
+                        <div class="mt-8 pt-6 border-t border-gray-100">{{ $announcements->links() }}</div>
                     @endif
-
                 </div>
             </div>
 
             {{-- Community Forum --}}
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-
-                {{-- Board Header --}}
                 <div class="bg-gray-50 border-b border-gray-200 px-8 py-5 flex items-center justify-between">
                     <div>
                         <h1 class="text-xl font-semibold text-gray-900">Community Forum</h1>
-                        <p class="text-sm text-gray-500 mt-0.5">Share your thoughts with Barangay 67</p>
+                        <p class="text-sm text-gray-500 mt-0.5">Recent posts from the community</p>
                     </div>
+                    <a href="{{ route('forum.getPosts') }}?new_post=1"
+                        class="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-150">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Post
+                    </a>
                 </div>
                 <div class="p-8">
-                    <div id="posts-container" class="space-y-4">
-                        <p class="text-center text-gray-400 py-10">{{ __('In progress...') }}</p>
+                    <div id="dashboard-forum-posts" class="space-y-3">
+                        <p class="text-center text-gray-400 py-6 text-sm">Loading posts...</p>
                     </div>
-                    <div id="pagination-links" class="mt-6 pt-6 border-t border-gray-100"></div>
+                    <div id="dashboard-forum-pagination"></div>
+                    <div class="mt-4 text-center">
+                        <a href="{{ route('forum.getPosts') }}" class="text-xs text-blue-500 hover:underline">View all posts →</a>
+                    </div>
                 </div>
             </div>
-            
-            {{-- Complaints --}}
+
+            {{-- My Complaints (dashboard preview) --}}
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-8 py-5">
                     <div>
                         <h1 class="text-xl font-semibold text-gray-900">My Complaints</h1>
                         <p class="text-sm text-gray-500 mt-0.5">Track the status of your submitted concerns</p>
                     </div>
-                    <a href="{{ route('complaints.index') }}" 
-                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-700 text-white text-sm font-bold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
+                    <a href="{{ route('complaints.index') }}"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-700 text-white text-sm font-bold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                         </svg>
                         File a Complaint
-                    </a>    
+                    </a>
                 </div>
+
                 <div class="p-8">
                     @forelse ($complaints as $complaint)
-
                         @php
                             $statusConfig = match($complaint->status) {
-                                'pending'    => ['bg' => 'bg-yellow-50',  'text' => 'text-yellow-700',  'border' => 'border-yellow-200',  'dot' => 'bg-yellow-400',  'label' => 'Pending'],
-                                'in_review'  => ['bg' => 'bg-blue-50',   'text' => 'text-blue-700',   'border' => 'border-blue-200',   'dot' => 'bg-blue-400',   'label' => 'In Review'],
-                                'delivered'  => ['bg' => 'bg-teal-50',   'text' => 'text-teal-700',   'border' => 'border-teal-200',   'dot' => 'bg-teal-400',   'label' => 'Delivered'],
-                                'resolved'   => ['bg' => 'bg-green-50',  'text' => 'text-green-700',  'border' => 'border-green-200',  'dot' => 'bg-green-400',  'label' => 'Resolved'],
-                                'rejected'   => ['bg' => 'bg-red-50',    'text' => 'text-red-700',    'border' => 'border-red-200',    'dot' => 'bg-red-400',    'label' => 'Rejected'],
-                                default      => ['bg' => 'bg-gray-50',   'text' => 'text-gray-600',   'border' => 'border-gray-200',   'dot' => 'bg-gray-400',   'label' => ucfirst($complaint->status)],
+                                'pending'       => ['bg' => 'bg-yellow-50',  'text' => 'text-yellow-700',  'border' => 'border-yellow-200',  'dot' => 'bg-yellow-400',  'label' => 'Pending'],
+                                'in_review'     => ['bg' => 'bg-blue-50',   'text' => 'text-blue-700',   'border' => 'border-blue-200',   'dot' => 'bg-blue-400',   'label' => 'In Review'],
+                                'resolve_ready' => ['bg' => 'bg-violet-50', 'text' => 'text-violet-700', 'border' => 'border-violet-200', 'dot' => 'bg-violet-400', 'label' => 'Ready to Resolve'],
+                                'resolved'      => ['bg' => 'bg-green-50',  'text' => 'text-green-700',  'border' => 'border-green-200',  'dot' => 'bg-green-400',  'label' => 'Resolved'],
+                                'rejected'      => ['bg' => 'bg-red-50',    'text' => 'text-red-700',    'border' => 'border-red-200',    'dot' => 'bg-red-400',    'label' => 'Rejected'],
+                                default         => ['bg' => 'bg-gray-50',   'text' => 'text-gray-600',   'border' => 'border-gray-200',   'dot' => 'bg-gray-400',   'label' => ucfirst($complaint->status)],
                             };
+                            $latestLog = $complaint->statusLogs->first();
+                            // Deep-link to the complaint card on the complaints page
+                            $complaintUrl = route('complaints.index') . '#complaint-' . $complaint->id;
                         @endphp
 
-                        <div class="group border border-gray-200 rounded-xl p-4 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 {{ !$loop->last ? 'mb-3' : '' }}">
+                        {{-- Entire card is a link to the full complaints page anchored to this complaint --}}
+                        <a href="{{ $complaintUrl }}"
+                            class="group block border rounded-xl p-4 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 {{ !$loop->last ? 'mb-3' : '' }} {{ $complaint->status === 'resolve_ready' ? 'border-violet-300 ring-2 ring-violet-100' : 'border-gray-200' }}">
+
+                            {{-- resolve_ready callout --}}
+                            @if($complaint->status === 'resolve_ready')
+                                <div class="flex items-center gap-2 mb-2 text-xs font-semibold text-violet-700">
+                                    <svg class="w-3.5 h-3.5 text-violet-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                    </svg>
+                                    Action needed — click to review and resolve
+                                </div>
+                            @endif
+
                             <div class="flex items-start justify-between gap-4">
                                 <div class="flex-1 min-w-0">
-                                    {{-- Category + Status row --}}
                                     <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                        <span class="text-xs font-semibold text-gray-700">
-                                            {{ $complaint->category ?? 'Uncategorized' }}
-                                        </span>
+                                        <span class="text-xs font-semibold text-gray-700">{{ $complaint->category ?? 'Uncategorized' }}</span>
                                         <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-md border {{ $statusConfig['bg'] }} {{ $statusConfig['text'] }} {{ $statusConfig['border'] }}">
                                             <span class="w-1.5 h-1.5 rounded-full {{ $statusConfig['dot'] }}"></span>
-                                            Status: {{ $statusConfig['label'] }}
+                                            {{ $statusConfig['label'] }}
                                         </span>
                                         <span class="text-xs text-gray-400 font-mono">#{{ $complaint->reference_no }}</span>
                                     </div>
 
-                                    {{-- Subject --}}
-                                    <p class="text-sm font-semibold text-gray-800 leading-snug truncate">
-                                        {{ $complaint->subject }}
-                                    </p>
+                                    <p class="text-sm font-semibold text-gray-800 leading-snug truncate">{{ $complaint->subject }}</p>
+                                    <p class="text-sm text-gray-500 mt-1 line-clamp-2 leading-relaxed">{{ $complaint->description }}</p>
 
-                                    {{-- Description preview --}}
-                                    <p class="text-sm text-gray-500 mt-1 line-clamp-2 leading-relaxed">
-                                        {{ $complaint->description }}
-                                    </p>
-
-                                    {{-- Meta --}}
                                     <p class="text-xs text-gray-400 mt-2 flex items-center gap-1">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -188,26 +188,24 @@
                                             &nbsp;·&nbsp; Resolved {{ $complaint->resolved_at->format('M j, Y') }}
                                         @endif
                                     </p>
-                                </div>
 
-                                {{-- Actions --}}
-                                <div class="flex items-center gap-2 shrink-0">
-                                    @if(in_array($complaint->status, ['pending', 'in_review']))
-                                        <form method="POST" action="{{ route('complaints.resolve', $complaint) }}">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button
-                                                type="submit"
-                                                class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline transition"
-                                                onclick="return confirm('Mark this complaint as resolved?')"
-                                            >
-                                                Resolve
-                                            </button>
-                                        </form>
+                                    {{-- Most recent status change --}}
+                                    @if($latestLog)
+                                        <p class="text-xs text-amber-700 mt-1 flex items-center gap-1">
+                                            <svg class="w-3 h-3 text-amber-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                            </svg>
+                                            Last updated by {{ $latestLog->user->name }} · {{ $latestLog->created_at->format('M j, Y') }}
+                                        </p>
                                     @endif
                                 </div>
+
+                                {{-- Arrow hint --}}
+                                <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0 mt-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
                             </div>
-                        </div>
+                        </a>
 
                     @empty
                         <div class="text-center py-16 text-gray-400">
@@ -219,12 +217,114 @@
                     @endforelse
 
                     @if(isset($complaints) && method_exists($complaints, 'hasPages') && $complaints->hasPages())
-                        <div class="mt-6 pt-5 border-t border-gray-100">
-                            {{ $complaints->links() }}
+                        <div class="mt-6 pt-5 border-t border-gray-100">{{ $complaints->links() }}</div>
+                    @endif
+
+                    {{-- View all link --}}
+                    @if($complaints->count())
+                        <div class="mt-4 text-center">
+                            <a href="{{ route('complaints.index') }}" class="text-xs text-blue-500 hover:underline">View all complaints →</a>
                         </div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        (function() {
+            let currentPage = 1;
+
+            function loadDashboardForum(page) {
+                const container = document.getElementById('dashboard-forum-posts');
+                const pagination = document.getElementById('dashboard-forum-pagination');
+                container.innerHTML = '<p class="text-center text-gray-400 py-6 text-sm">Loading posts...</p>';
+
+                fetch(`/api/forum-posts?per_page=5&page=${page}`, { headers: { 'Accept': 'application/json' } })
+                    .then(r => r.json())
+                    .then(result => {
+                        const posts = result.data;
+                        container.innerHTML = '';
+
+                        if (!posts || posts.length === 0) {
+                            container.innerHTML = '<p class="text-center text-gray-400 text-sm py-6">No posts yet. Be the first to post!</p>';
+                            pagination.innerHTML = '';
+                            return;
+                        }
+
+                        posts.forEach(post => {
+                            const isDeleted = post.is_soft_delete || post.body === 'Deleted by user';
+                            const bodyText = isDeleted ? '(This post has been deleted)' : post.body;
+                            const initials = post.user.name.substring(0, 2).toUpperCase();
+                            const date = new Date(post.created_at).toLocaleDateString('en-US', {
+                                month: 'short', day: 'numeric', year: 'numeric'
+                            });
+                            const commentCount = post.comments_count ?? 0;
+
+                            const card = document.createElement('a');
+                            // Redirect to forum page with post id — forum.js will auto-open that post's modal
+                            card.href = "{{ route('forum.getPosts') }}?open_post=" + post.id;
+                            card.className = 'group flex items-start gap-3 border border-gray-200 rounded-xl p-4 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 block';
+
+                            card.innerHTML = `
+                                <div class="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center bg-gray-50 text-gray-700 font-bold text-xs shrink-0">${initials}</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between gap-2 mb-0.5">
+                                        <span class="text-sm font-semibold text-gray-800">${post.user.name}</span>
+                                        <span class="text-xs text-gray-400 shrink-0">${date}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 line-clamp-2 leading-relaxed${isDeleted ? ' italic' : ''}">${bodyText}</p>
+                                    <p class="text-xs text-gray-400 mt-1">${commentCount} comment${commentCount !== 1 ? 's' : ''}</p>
+                                </div>
+                                <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0 mt-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            `;
+
+                            container.appendChild(card);
+                        });
+
+                        // Pagination
+                        renderDashboardPagination(result, pagination);
+                    })
+                    .catch(() => {
+                        document.getElementById('dashboard-forum-posts').innerHTML =
+                            '<p class="text-center text-red-400 text-sm py-6">Could not load posts.</p>';
+                    });
+            }
+
+            function renderDashboardPagination(meta, container) {
+                container.innerHTML = '';
+                if (meta.last_page <= 1) return;
+
+                const nav = document.createElement('div');
+                nav.className = 'flex justify-center items-center gap-2 mt-4';
+
+                // Prev
+                const prev = document.createElement('button');
+                prev.innerHTML = '&larr;';
+                prev.className = `px-3 py-1.5 text-sm border rounded-lg transition ${currentPage === 1 ? 'opacity-40 cursor-not-allowed bg-white text-gray-400 border-gray-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`;
+                prev.disabled = currentPage === 1;
+                prev.onclick = () => { currentPage--; loadDashboardForum(currentPage); };
+                nav.appendChild(prev);
+
+                // Page indicator
+                const indicator = document.createElement('span');
+                indicator.className = 'text-xs text-gray-500 px-2';
+                indicator.textContent = `Page ${meta.current_page} of ${meta.last_page}`;
+                nav.appendChild(indicator);
+
+                // Next
+                const next = document.createElement('button');
+                next.innerHTML = '&rarr;';
+                next.className = `px-3 py-1.5 text-sm border rounded-lg transition ${currentPage === meta.last_page ? 'opacity-40 cursor-not-allowed bg-white text-gray-400 border-gray-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`;
+                next.disabled = currentPage === meta.last_page;
+                next.onclick = () => { currentPage++; loadDashboardForum(currentPage); };
+                nav.appendChild(next);
+
+                container.appendChild(nav);
+            }
+
+            document.addEventListener('DOMContentLoaded', () => loadDashboardForum(1));
+        })();
+    </script>
 </x-app-layout>

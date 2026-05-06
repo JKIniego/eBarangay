@@ -9,17 +9,23 @@ use Illuminate\View\View;
 
 class ForumController extends Controller
 {
+    public function index()
+    {
+        return view('forum');
+    }
     public function getPosts(Request $request)
     {
         $query = $request->query('search');
 
+        $perPage = $request->input('per_page', 10);
+
         $posts = ForumPost::with(['user', 'comments.user'])
-                    ->withCount('comments')
-                    ->when($query, function ($q) use ($query) {
-                        return $q->where('body', 'LIKE', "%{$query}%");
-                    })
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10);
+            ->withCount('comments')
+            ->when($query, function ($q) use ($query) {
+                return $q->where('body', 'LIKE', "%{$query}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
         
         if ($request->expectsJson()) {
             return response()->json($posts);
