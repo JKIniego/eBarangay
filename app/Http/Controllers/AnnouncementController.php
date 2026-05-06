@@ -99,20 +99,24 @@ class AnnouncementController extends Controller
     {
         $query = Announcement::with('user');
 
-        // If bulletin parameter is set, get published announcements ordered by featured & date
         if ($request->boolean('bulletin')) {
             $query = $query->where('is_published', true)
                 ->orderByDesc('is_featured')
                 ->orderByDesc('published_at');
         } else {
-            // Otherwise, get user's own announcements (requires authentication)
             abort_unless($request->user(), 401);
             $query = $query->where('user_id', $request->user()->id)
                 ->latest();
         }
 
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('body', 'like', "%{$searchTerm}%");
+            });
+        }
         $announcements = $query->paginate(12);
-
         return response()->json([
             'success' => true,
             'data' => $announcements->items(),

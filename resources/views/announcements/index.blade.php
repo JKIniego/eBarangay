@@ -17,6 +17,41 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm sm:rounded-lg border border-gray-200 overflow-hidden">
+
+                <div class="bg-gray-50 border-b border-gray-200 px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">All Announcements</h1>
+                    </div>
+
+                    <!-- NEW: Flex container to hold both the search bar and the spinner -->
+                    <div class="flex items-center gap-3">
+
+                       <div class="relative">
+                            <!-- Search Icon (Left) -->
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                            </div>
+
+                            <input
+                                type="text"
+                                id="searchInput"
+                                placeholder="Search announcements..."
+                                class="w-full sm:w-72 pl-10 pr-10 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition"
+                            >
+                        </div>
+                        <div class="w-5 flex justify-center shrink-0">
+                            <svg id="searchSpinner" class="w-5 h-5 text-blue-500 hidden" style="animation: custom-spin 1s linear infinite;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <style>
+                                    @keyframes custom-spin { 100% { transform: rotate(360deg); } }
+                                </style>
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
                 <div class="p-6 sm:p-8 space-y-6">
                     <div id="successMessage" class="hidden rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"></div>
 
@@ -95,16 +130,30 @@
         const API_BASE = '/api/announcements';
         let currentPage = 1;
         let editingAnnouncementId = null;
+        let currentSearchQuery = '';
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadAnnouncements();
             document.getElementById('announcementForm').addEventListener('submit', handleFormSubmit);
-            
-            // Handle edit mode from query params
+
+            const searchInput = document.getElementById('searchInput');
+            const searchSpinner = document.getElementById('searchSpinner');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+
+                searchSpinner.classList.remove('hidden');
+
+                searchTimeout = setTimeout(() => {
+                    currentSearchQuery = e.target.value.trim();
+                    loadAnnouncements(1);
+                }, 500);
+            });
+
             const urlParams = new URLSearchParams(window.location.search);
             const editId = urlParams.get('edit');
-            
+
             if (editId) {
                 const editData = sessionStorage.getItem('editAnnouncementData');
                 if (editData) {
@@ -115,10 +164,14 @@
             }
         });
 
-        // Load announcements via AJAX
         async function loadAnnouncements(page = 1) {
             try {
-                const response = await fetch(`${API_BASE}?page=${page}`, {
+                const queryParams = new URLSearchParams({ page: page });
+                if (currentSearchQuery) {
+                    queryParams.append('search', currentSearchQuery);
+                }
+
+                const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
                     headers: {
                         'Authorization': `Bearer ${document.querySelector('meta[name="csrf-token"]')?.__proto__.getAttribute?.call(document.documentElement, 'data-user-token') || ''}`,
                         'Accept': 'application/json',
@@ -133,20 +186,26 @@
                 currentPage = page;
             } catch (error) {
                 console.error('Error loading announcements:', error);
-                document.getElementById('announcementsList').innerHTML = 
+                document.getElementById('announcementsList').innerHTML =
                     '<div class="text-center py-8 text-red-600">Failed to load announcements. Please try again.</div>';
+            } finally {
+                document.getElementById('searchSpinner').classList.add('hidden');
             }
         }
 
         // Render announcements table
         function renderAnnouncements(announcements) {
             const container = document.getElementById('announcementsList');
-            
+
             if (announcements.length === 0) {
+                const message = currentSearchQuery
+                    ? `No announcements found matching "${escapeHtml(currentSearchQuery)}"`
+                    : 'Create your first announcement to start publishing updates.';
+
                 container.innerHTML = `
                     <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-6 py-16 text-center">
-                        <h3 class="text-lg font-semibold text-gray-900">No announcements yet</h3>
-                        <p class="mt-2 text-sm text-gray-500">Create your first announcement to start publishing updates.</p>
+                        <h3 class="text-lg font-semibold text-gray-900">${currentSearchQuery ? 'No results found' : 'No announcements yet'}</h3>
+                        <p class="mt-2 text-sm text-gray-500">${message}</p>
                     </div>
                 `;
                 return;
@@ -197,11 +256,10 @@
             `;
         }
 
-        // Render pagination
         function renderPagination(pagination, page) {
             const container = document.getElementById('paginationContainer');
-            
-            if (pagination.last_page <= 1) {
+
+            if (!pagination || pagination.last_page <= 1) {
                 container.innerHTML = '';
                 return;
             }
@@ -218,7 +276,6 @@
             container.innerHTML = `<div class="flex items-center justify-center gap-2">${buttons.join('')}</div>`;
         }
 
-        // Open create modal
         function openCreateModal() {
             editingAnnouncementId = null;
             document.getElementById('announcementId').value = '';
@@ -229,13 +286,11 @@
             clearErrors();
         }
 
-        // Open edit modal
         async function openEditModal(id) {
             editingAnnouncementId = id;
             clearErrors();
-            
+
             try {
-                // Redirect to edit page which will store data and come back with modal open
                 window.location.href = `/announcements/${id}/edit`;
             } catch (error) {
                 console.error('Error loading announcement:', error);
@@ -243,22 +298,20 @@
             }
         }
 
-        // Populate edit modal with data
         function populateEditModal(data) {
             editingAnnouncementId = data.id;
-            
+
             document.getElementById('announcementId').value = data.id;
             document.getElementById('title').value = data.title;
             document.getElementById('body').value = data.body;
             document.getElementById('is_published').checked = data.is_published;
             document.getElementById('is_featured').checked = data.is_featured;
-            
+
             document.getElementById('modalTitle').textContent = 'Edit Announcement';
             document.getElementById('submitBtnText').textContent = 'Update announcement';
             document.getElementById('announcementModal').classList.remove('hidden');
         }
 
-        // Close modal
         function closeModal() {
             document.getElementById('announcementModal').classList.add('hidden');
             document.getElementById('announcementForm').reset();
@@ -266,7 +319,6 @@
             clearErrors();
         }
 
-        // Handle form submission
         async function handleFormSubmit(e) {
             e.preventDefault();
             clearErrors();
@@ -284,8 +336,12 @@
                 const url = isEditMode ? `${API_BASE}/${announcementId}` : API_BASE;
                 const method = isEditMode ? 'PATCH' : 'POST';
 
+                if (isEditMode) {
+                    formData.append('_method', 'PATCH');
+                }
+
                 const response = await fetch(url, {
-                    method: method,
+                    method: isEditMode ? 'POST' : 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
@@ -316,7 +372,6 @@
             }
         }
 
-        // Delete announcement
         async function deleteAnnouncement(id) {
             if (!confirm('Are you sure you want to delete this announcement?')) return;
 
@@ -344,7 +399,6 @@
             }
         }
 
-        // Display validation errors
         function displayErrors(errors) {
             for (const [field, messages] of Object.entries(errors)) {
                 const errorElement = document.getElementById(`${field}Error`);
@@ -355,7 +409,6 @@
             }
         }
 
-        // Clear error messages
         function clearErrors() {
             document.querySelectorAll('[id$="Error"]').forEach(el => {
                 el.classList.add('hidden');
@@ -363,7 +416,6 @@
             });
         }
 
-        // Show success message
         function showSuccess(message) {
             const container = document.getElementById('successMessage');
             container.textContent = message;
@@ -373,14 +425,12 @@
             }, 4000);
         }
 
-        // Escape HTML to prevent XSS
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        // Close modal on outside click
         document.addEventListener('click', function(e) {
             const modal = document.getElementById('announcementModal');
             if (e.target === modal) {
