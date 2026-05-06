@@ -44,8 +44,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/forum', [ForumController::class, 'index'])->name('forum.getPosts');
-    Route::get('/api/forum-posts', [ForumController::class, 'getPosts']);
-    Route::post('/api/forum-posts', [ForumController::class, 'storePost']);
+    Route::get('/forum-posts', [ForumController::class, 'getPosts']);
+    Route::post('/forum-posts', [ForumController::class, 'storePost']);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
