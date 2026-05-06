@@ -97,10 +97,21 @@ class AnnouncementController extends Controller
     // API Endpoints for AJAX
     public function apiIndex(Request $request): JsonResponse
     {
-        $announcements = Announcement::with('user')
-            ->where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(10);
+        $query = Announcement::with('user');
+
+        // If bulletin parameter is set, get published announcements ordered by featured & date
+        if ($request->boolean('bulletin')) {
+            $query = $query->where('is_published', true)
+                ->orderByDesc('is_featured')
+                ->orderByDesc('published_at');
+        } else {
+            // Otherwise, get user's own announcements (requires authentication)
+            abort_unless($request->user(), 401);
+            $query = $query->where('user_id', $request->user()->id)
+                ->latest();
+        }
+
+        $announcements = $query->paginate(12);
 
         return response()->json([
             'success' => true,
