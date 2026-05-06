@@ -72,7 +72,7 @@ class ComplaintController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin' && $complaint->user_id !== $user->id) {
+        if ($user->role === 'admin' && ($complaint->user_id !== $user->id || $request->has('status'))) {
             // Admin allowed: pending, in_review, resolve_ready, rejected
             // "resolved" is exclusively for the complainant
             $request->validate([
