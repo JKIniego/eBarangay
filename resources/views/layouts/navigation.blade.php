@@ -35,8 +35,8 @@
                         </x-nav-link>
                     @endif
                     @if(Auth::user()->role === 'admin')
-                        <x-nav-link :href="route('register')" :active="request()->routeIs('register')">
-                            {{ __('Register') }}
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            {{ __('User Management') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -119,8 +119,8 @@
                 </x-nav-link>
             @endif
             @if(Auth::user()->role === 'admin')
-                <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">
-                    {{ __('Register') }}
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    {{ __('User Management') }}
                 </x-responsive-nav-link>
             @endif
         </div>
