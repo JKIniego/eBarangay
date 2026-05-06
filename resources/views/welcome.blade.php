@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'eBarangay') }} — Barangay 67 Tacloban City</title>
+    <title>{{ config('app.name', 'eBarangay') }} - Barangay 67 Tacloban City</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -17,7 +17,7 @@
 </head>
 <body class="font-sans antialiased bg-gray-50 text-gray-900 selection:bg-indigo-100 selection:text-indigo-900">
 
-    {{-- ── TOP NAV (Frosted Glass Effect) ── --}}
+    {{--  TOP NAV (Frosted Glass Effect)  --}}
     <nav class="bg-white/80 backdrop-blur-md border-b border-gray-200/80 sticky top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -50,7 +50,7 @@
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-12">
 
-            {{-- ── HERO CARD (Fun & Engaging) ── --}}
+            {{--  HERO CARD (Fun & Engaging)  --}}
             <div class="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 border border-indigo-100 rounded-[2rem] shadow-sm overflow-hidden isolation-auto">
                 
                 {{-- Decorative Blobs --}}
@@ -109,7 +109,7 @@
                 </div>
             </div>
 
-            {{-- ── STATS ROW (Playful & Bouncy) ── --}}
+            {{--  STATS ROW (Playful & Bouncy)  --}}
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div class="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 px-6 py-6 text-center group">
                     <div class="w-12 h-12 mx-auto bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -141,7 +141,7 @@
                 </div>
             </div>
 
-            {{-- ── FEATURES CARD ── --}}
+            {{--  FEATURES CARD  --}}
             <div id="features" class="bg-white border border-gray-200 rounded-[2rem] shadow-sm overflow-hidden scroll-mt-24">
 
                 <div class="text-center px-8 pt-12 pb-6">
@@ -234,7 +234,7 @@
                 </div>
             </div>
 
-            {{-- ── HOW IT WORKS ── --}}
+            {{--  HOW IT WORKS  --}}
             <div class="bg-indigo-900 text-white rounded-[2rem] shadow-xl overflow-hidden relative isolation-auto">
                 {{-- BG Pattern --}}
                 <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 24px 24px;"></div>
@@ -271,7 +271,7 @@
                 </div>
             </div>
 
-            {{-- ── CTA CARD ── --}}
+            {{--  CTA CARD  --}}
             <div class="bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-800 rounded-[2rem] shadow-2xl overflow-hidden text-white">
                 <div class="px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-8 text-center sm:text-left">
                     <div>
@@ -291,7 +291,7 @@
         </div>
     </div>
 
-    {{-- ── FOOTER ── --}}
+    {{--  FOOTER  --}}
     <footer class="mt-10 border-t border-gray-200 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">

@@ -181,7 +181,7 @@
 
                 const result = await response.json();
                 renderAnnouncements(result.data);
-                renderPagination(result.pagination, page);
+                renderPagination(result);
                 currentPage = page;
             } catch (error) {
                 console.error('Error loading announcements:', error);
@@ -211,68 +211,79 @@
             }
 
             const rows = announcements.map(announcement => `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-4">
-                        <div class="font-medium text-gray-900">${escapeHtml(announcement.title)}</div>
-                        <div class="mt-1 text-sm text-gray-500 line-clamp-2">${escapeHtml(announcement.body)}</div>
-                    </td>
-                    <td class="px-4 py-4 text-sm text-gray-700">
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${announcement.is_published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}">
-                                ${announcement.is_published ? 'Published' : 'Draft'}
-                            </span>
-                            ${announcement.is_featured ? '<span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">Featured</span>' : ''}
-                        </div>
-                    </td>
-                    <td class="px-4 py-4 text-sm text-gray-700">
-                        ${announcement.published_at ? new Date(announcement.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
-                    </td>
-                    <td class="px-4 py-4 text-right text-sm">
-                        <div class="flex items-center justify-end gap-3">
-                            <button onclick="openEditModal(${announcement.id})" class="font-medium text-gray-900 hover:text-gray-700">Edit</button>
-                            <button onclick="deleteAnnouncement(${announcement.id})" class="font-medium text-red-600 hover:text-red-500">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-
-            container.innerHTML = `
-                <div class="overflow-hidden rounded-xl border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Title</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Published</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            ${rows}
-                        </tbody>
-                    </table>
+        <div class="group flex items-center justify-between gap-6 rounded-xl border border-gray-100 bg-white p-5 transition-all hover:border-gray-300 hover:shadow-md">
+            
+            <!-- 1. Primary Info (Flexible & Largest) -->
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-3">
+                    <h3 class="font-bold text-gray-900 truncate" title="${escapeHtml(announcement.title)}">
+                        ${escapeHtml(announcement.title)}
+                    </h3>
+                    <div class="flex shrink-0 gap-2">
+                        <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${announcement.is_published ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                            ${announcement.is_published ? 'Published' : 'Draft'}
+                        </span>
+                        ${announcement.is_featured ? '<span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700">Featured</span>' : ''}
+                    </div>
                 </div>
-            `;
+                <p class="mt-1 text-sm text-gray-500 line-clamp-1">${escapeHtml(announcement.body)}</p>
+                <div class="mt-2 flex items-center gap-2 text-xs text-gray-400">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    ${announcement.published_at ? new Date(announcement.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Not published yet'}
+                </div>
+            </div>
+
+            <!-- 2. Actions (Fixed Width) -->
+            <div class="flex shrink-0 items-center gap-2 border-l border-gray-100 pl-6">
+                <button onclick="openEditModal(${announcement.id})" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition" title="Edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                    </svg>
+                </button>
+                <button onclick="deleteAnnouncement(${announcement.id})" class="rounded-lg p-2 text-red-400 hover:bg-red-50 hover:text-red-600 transition" title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                        <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `).join('');
+
+    container.innerHTML = `<div class="flex flex-col gap-4">${rows}</div>`;
         }
 
-        function renderPagination(pagination, page) {
+        function renderPagination(meta) {
             const container = document.getElementById('paginationContainer');
+            container.innerHTML = '';
 
-            if (!pagination || pagination.last_page <= 1) {
-                container.innerHTML = '';
-                return;
-            }
+            if (meta.last_page <= 1) return;
 
-            const buttons = [];
-            for (let i = 1; i <= pagination.last_page; i++) {
-                buttons.push(`
-                    <button onclick="loadAnnouncements(${i})" class="inline-flex items-center rounded-md border ${i === page ? 'bg-gray-900 text-white' : 'border-gray-300 text-gray-700 hover:bg-gray-50'} px-3 py-2 text-sm font-medium">
-                        ${i}
-                    </button>
-                `);
-            }
+            const nav = document.createElement('nav');
+            nav.className = "flex justify-center space-x-2 mt-8 pt-6 border-t border-gray-100";
 
-            container.innerHTML = `<div class="flex items-center justify-center gap-2">${buttons.join('')}</div>`;
+            meta.links.forEach(link => {
+                const btn = document.createElement('button');
+                btn.innerHTML = link.label; 
+                
+                btn.className = `px-4 py-2 border rounded-lg text-sm transition ${
+                    link.active 
+                        ? 'bg-gray-900 text-white border-gray-900' 
+                        : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                } ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`;
+
+                if (link.url) {
+                    btn.onclick = () => {
+                        const url = new URL(link.url);
+                        const page = url.searchParams.get('page');
+                        loadAnnouncements(page); 
+                    };
+                }
+                
+                nav.appendChild(btn);
+            });
+
+            container.appendChild(nav);
         }
 
         function openCreateModal() {

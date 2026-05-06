@@ -99,35 +99,31 @@ class AnnouncementController extends Controller
     {
         $query = Announcement::with('user');
 
+        // Filter for public bulletin vs. admin management
         if ($request->boolean('bulletin')) {
-            $query = $query->where('is_published', true)
+            $query->where('is_published', true)
                 ->orderByDesc('is_featured')
                 ->orderByDesc('published_at');
         } else {
             abort_unless($request->user(), 401);
-            $query = $query->where('user_id', $request->user()->id)
+            $query->where('user_id', $request->user()->id)
                 ->latest();
         }
 
+        // AJAX Search logic
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
-                  ->orWhere('body', 'like', "%{$searchTerm}%");
+                ->orWhere('body', 'like', "%{$searchTerm}%");
             });
         }
-        $announcements = $query->paginate(12);
-        return response()->json([
-            'success' => true,
-            'data' => $announcements->items(),
-            'pagination' => [
-                'total' => $announcements->total(),
-                'per_page' => $announcements->perPage(),
-                'current_page' => $announcements->currentPage(),
-                'last_page' => $announcements->lastPage(),
-                'has_more' => $announcements->hasMorePages(),
-            ],
-        ]);
+
+        // Match the per_page logic from your forum
+        $perPage = $request->input('per_page', 12);
+        $announcements = $query->paginate($perPage);
+
+        return response()->json($announcements); 
     }
 
     public function apiStore(AnnouncementRequest $request): JsonResponse

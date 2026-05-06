@@ -111,11 +111,7 @@
                     </div>
 
                     <!-- Pagination Container -->
-                    <div id="paginationContainer" class="mt-8 pt-6 border-t border-gray-100">
-                        @if($announcements->hasPages())
-                            {{ $announcements->links() }}
-                        @endif
-                    </div>
+                    <div id="paginationContainer"></div>
                 </div>
             </div>
         </div>
@@ -140,7 +136,7 @@
             const searchSpinner = document.getElementById('searchSpinner');
             let searchTimeout;
 
-            setupPaginationListeners();
+            loadBulletins();
 
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(searchTimeout);
@@ -148,7 +144,7 @@
 
                 searchTimeout = setTimeout(() => {
                     currentSearchQuery = e.target.value.trim();
-                    loadBulletins(1);
+                    loadBulletins();
                 }, 500);
             });
         });
@@ -168,7 +164,7 @@
 
                 const result = await response.json();
                 renderBulletins(result.data);
-                renderPagination(result.pagination, page);
+                renderPagination(result);
                 currentPage = page;
             } catch (error) {
                 console.error('Error loading bulletins:', error);
@@ -251,36 +247,37 @@
             container.innerHTML = html;
         }
 
-        function renderPagination(pagination, page) {
+        function renderPagination(meta) {
             const container = document.getElementById('paginationContainer');
+            container.innerHTML = '';
 
-            if (!pagination || pagination.last_page <= 1) {
-                container.innerHTML = '';
-                return;
-            }
+            if (meta.last_page <= 1) return;
 
-            const buttons = [];
-            for (let i = 1; i <= pagination.last_page; i++) {
-                buttons.push(`
-                    <button onclick="loadBulletins(${i})" class="inline-flex items-center rounded-md border ${i === page ? 'bg-gray-900 text-white' : 'border-gray-300 text-gray-700 hover:bg-gray-50'} px-3 py-2 text-sm font-medium mr-1">
-                        ${i}
-                    </button>
-                `);
-            }
+            const nav = document.createElement('nav');
+            nav.className = "flex justify-center space-x-2 mt-8 pt-6 border-t border-gray-100";
 
-            container.innerHTML = `<div class="flex items-center justify-center gap-2 mt-4">${buttons.join('')}</div>`;
-        }
+            meta.links.forEach(link => {
+                const btn = document.createElement('button');
+                btn.innerHTML = link.label; 
+                
+                btn.className = `px-4 py-2 border rounded-lg text-sm transition ${
+                    link.active 
+                        ? 'bg-gray-900 text-white border-gray-900' 
+                        : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                } ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`;
 
-        function setupPaginationListeners() {
-            document.getElementById('paginationContainer').addEventListener('click', function(e) {
-                const link = e.target.closest('a');
-                if (link) {
-                    e.preventDefault();
-                    const url = new URL(link.href);
-                    const page = url.searchParams.get('page');
-                    if (page) loadBulletins(parseInt(page));
+                if (link.url) {
+                    btn.onclick = () => {
+                        const url = new URL(link.url, window.location.origin);
+                        const page = url.searchParams.get('page');
+                        loadBulletins(page); 
+                    };
                 }
+                
+                nav.appendChild(btn);
             });
+
+            container.appendChild(nav);
         }
 
         function escapeHtml(text) {

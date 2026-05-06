@@ -1,5 +1,8 @@
 function initForum(currentUserId, isAdmin) {
     async function fetchPosts(urlOrSearch = '') {
+        const spinner = document.getElementById('searchSpinner');
+        if (spinner) spinner.classList.remove('hidden');
+        
         let url = urlOrSearch.includes('api/') ? urlOrSearch : `/api/forum-posts?search=${urlOrSearch}`;
 
         const response = await fetch(url, {
@@ -9,7 +12,8 @@ function initForum(currentUserId, isAdmin) {
         const result = await response.json();
         
         renderPosts(result.data, currentUserId, isAdmin); 
-        renderPagination(result); 
+        renderPagination(result);
+        if (spinner) spinner.classList.add('hidden');
     }
 
     function renderPosts(posts, currentUserId, isAdmin) {
