@@ -30,4 +30,9 @@ class Complaint extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function replies(): HasMany
+    {
+        return $this->hasMany(ComplaintReply::class);
+    }
 }
