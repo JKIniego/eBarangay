@@ -25,7 +25,6 @@
 
                     <!-- NEW: Flex container to hold both the search bar and the spinner -->
                     <div class="flex items-center gap-3">
-
                        <div class="relative">
                             <!-- Search Icon (Left) -->
                             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
