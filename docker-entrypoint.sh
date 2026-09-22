@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-# Create an empty .env file if it doesn't exist so key:generate doesn't crash
+# Create a basic .env file if it doesn't exist so key:generate has a placeholder to replace
 if [ ! -f .env ]; then
-    touch .env
+    echo "APP_KEY=" > .env
 fi
 
 # Generate app key if not set
