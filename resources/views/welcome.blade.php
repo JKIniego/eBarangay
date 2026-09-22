@@ -35,6 +35,12 @@
 
                 {{-- Nav actions --}}
                 <div class="flex items-center gap-3">
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 transition-colors">
+                            Register
+                        </a>
+                    @endif
                     <a href="{{ route('login') }}"
                        class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:scale-105 transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -251,8 +257,8 @@
 
                         <div class="relative z-10 flex flex-col items-center text-center">
                             <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-400 text-white flex items-center justify-center text-xl font-black shadow-lg mb-4 ring-4 ring-indigo-900">1</div>
-                            <h3 class="text-lg font-bold mb-2">Request Account</h3>
-                            <p class="text-indigo-200 text-sm leading-relaxed max-w-xs">Contact your barangay admin to have your official resident account registered in our system.</p>
+                            <h3 class="text-lg font-bold mb-2">Create an Account</h3>
+                            <p class="text-indigo-200 text-sm leading-relaxed max-w-xs">Register your official resident account directly in our system to get started instantly.</p>
                         </div>
 
                         <div class="relative z-10 flex flex-col items-center text-center">

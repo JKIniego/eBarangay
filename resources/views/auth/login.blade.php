@@ -70,10 +70,16 @@
 
             </div>
 
-            <div class="flex flex-col items-center justify-center mt-4">
+            <div class="flex flex-col items-center justify-center mt-4 space-y-3">
                 <x-primary-button class="w-full flex justify-center">
                     {{ __('Log in') }}
                 </x-primary-button>
+
+                @if (Route::has('register'))
+                    <a href="{{ route('register') }}" class="w-full inline-flex justify-center items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        {{ __('Create an Account') }}
+                    </a>
+                @endif
             </div>
         </form>
     </div>

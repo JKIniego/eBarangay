@@ -6,12 +6,20 @@ function initForum(currentUserId, isAdmin) {
         let url = urlOrSearch.includes('api/') ? urlOrSearch : `/api/forum-posts?search=${urlOrSearch}`;
 
         const response = await fetch(url, {
+            credentials: 'include',
             headers: { 'Accept': 'application/json' }
         });
         
         const result = await response.json();
+        if (!response.ok) {
+            console.error('API Error:', result);
+            const container = document.getElementById('posts-container');
+            if (container) container.innerHTML = `<p class="text-red-500 text-center py-4">Error loading posts: ${result.message || 'Unknown error'}</p>`;
+            if (spinner) spinner.classList.add('hidden');
+            return;
+        }
         
-        renderPosts(result.data, currentUserId, isAdmin); 
+        renderPosts(result.data || [], currentUserId, isAdmin); 
         renderPagination(result);
         if (spinner) spinner.classList.add('hidden');
     }
@@ -48,6 +56,7 @@ function initForum(currentUserId, isAdmin) {
                 window.dispatchEvent(new CustomEvent('open-modal', { detail: 'reply-modal' }));
                 
                 const response = await fetch(`/api/forum-posts/${post.id}/comments`, {
+                    credentials: 'include',
                     headers: { 'Accept': 'application/json' }
                 });
                 const comments = await response.json();
@@ -272,6 +281,7 @@ function initForum(currentUserId, isAdmin) {
 
         try {
             const response = await fetch(`/api/forum-posts/${postId}/history`, {
+                credentials: 'include',
                 headers: { 'Accept': 'application/json' }
             });
 
@@ -511,6 +521,7 @@ function initForum(currentUserId, isAdmin) {
 
         try {
             const response = await fetch(`/api/forum-posts/${postId}/comments/${commentId}/history`, {
+                credentials: 'include',
                 headers: { 'Accept': 'application/json' }
             });
 
@@ -557,6 +568,7 @@ function initForum(currentUserId, isAdmin) {
 
     async function refreshComments(postId, currentUserId, isAdmin) {
         const response = await fetch(`/api/forum-posts/${postId}/comments`, {
+            credentials: 'include',
             headers: { 'Accept': 'application/json' }
         });
         const comments = await response.json();
@@ -660,7 +672,7 @@ function initForum(currentUserId, isAdmin) {
             
             window.dispatchEvent(new CustomEvent('close-modal', { detail: 'create-post-modal' }));
             
-            const postsResponse = await fetch('/api/forum-posts', { headers: { 'Accept': 'application/json' } });
+            const postsResponse = await fetch('/api/forum-posts', { credentials: 'include', headers: { 'Accept': 'application/json' } });
             const posts = await postsResponse.json();
             
             renderPosts(posts.data, currentUserId, isAdmin);
@@ -701,7 +713,7 @@ function initForum(currentUserId, isAdmin) {
         const openPostId = params.get('open_post');
         if (openPostId) {
             // Find the post in the already-rendered data and trigger its modal
-            fetch(`/api/forum-posts?per_page=100`, { headers: { 'Accept': 'application/json' } })
+            fetch(`/api/forum-posts?per_page=100`, { credentials: 'include', headers: { 'Accept': 'application/json' } })
                 .then(r => r.json())
                 .then(result => {
                     const post = result.data.find(p => String(p.id) === String(openPostId));
@@ -713,7 +725,7 @@ function initForum(currentUserId, isAdmin) {
                         replyForm.dataset.postId = post.id;
                         commentsContainer.innerHTML = '<p class="text-gray-400 text-sm italic py-4 flex justify-center">Loading comments...</p>';
                         window.dispatchEvent(new CustomEvent('open-modal', { detail: 'reply-modal' }));
-                        fetch(`/api/forum-posts/${post.id}/comments`, { headers: { 'Accept': 'application/json' } })
+                        fetch(`/api/forum-posts/${post.id}/comments`, { credentials: 'include', headers: { 'Accept': 'application/json' } })
                             .then(r => r.json())
                             .then(comments => renderComments(post.id, comments, currentUserId, isAdmin));
                     }
