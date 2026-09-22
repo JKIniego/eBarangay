@@ -20,7 +20,3 @@ services:
         value: database
       - key: QUEUE_CONNECTION
         value: sync
-    disk:
-      name: ebarangay-data
-      mountPath: /var/www/html/database
-      sizeGB: 1
