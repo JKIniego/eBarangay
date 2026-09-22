@@ -11,6 +11,13 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
 fi
 
+# Automatically use Render's provided URL for the app and Sanctum
+if [ -n "$RENDER_EXTERNAL_URL" ]; then
+    export APP_URL="$RENDER_EXTERNAL_URL"
+fi
+if [ -n "$RENDER_EXTERNAL_HOSTNAME" ]; then
+    export SANCTUM_STATEFUL_DOMAINS="$RENDER_EXTERNAL_HOSTNAME"
+fi
 
 # Run migrations
 php artisan migrate --force
